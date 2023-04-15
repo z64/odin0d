@@ -4,4 +4,7 @@ _*
 *.mov
 junk.*
 junk*
+
+*.drawio.dtmp
+*.drawio.bkp
 *.bin
