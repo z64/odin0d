@@ -1,12 +1,19 @@
 .PHONY: run check build
 
-build: 0d.bin
+ODIN_FLAGS ?= -debug -o:none
+
+build: demo_basics.bin demo_drawio.bin
 
 run: build
-	odin run .
+	./demo_basics.bin
+	./demo_drawio.bin
 
 check:
-	odin check .
+	odin check demo_basics
+	odin check demo_drawio
 
-0d.bin: main.odin
-	odin build .
+demo_basics.bin: demo_basics/*.odin
+	odin build demo_basics $(ODIN_FLAGS)
+
+demo_drawio.bin: demo_drawio/*.odin example.drawio
+	odin build demo_drawio $(ODIN_FLAGS)
