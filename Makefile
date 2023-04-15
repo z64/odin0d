@@ -15,5 +15,5 @@ check:
 demo_basics.bin: demo_basics/*.odin
 	odin build demo_basics $(ODIN_FLAGS)
 
-demo_drawio.bin: demo_drawio/*.odin example.drawio
+demo_drawio.bin: demo_drawio/*.odin
 	odin build demo_drawio $(ODIN_FLAGS)
