@@ -3,7 +3,6 @@ package zd
 import "core:container/queue"
 import "core:fmt"
 import "core:mem"
-import "core:runtime"
 
 // Data for an asyncronous component - effectively, a function with input
 // and output queues of messages.
@@ -125,7 +124,6 @@ make_leaf_with_data :: proc(name: string, data: ^$Data, handler: proc(^Eh, Messa
 make_message :: proc(port: string, data: $Data) -> Message_Untyped {
     data_ptr := new_clone(data)
     data_id := typeid_of(Data)
-    data_sz := size_of(Data)
 
     return {
         port          = port,
@@ -259,9 +257,9 @@ sender_eq :: proc(s1, s2: Sender) -> bool {
 
 // Delivers the given message to the receiver of this connector.
 deposit :: proc(c: Connector, message: Message_Untyped) {
-    message := message_clone(message)
-    message.port = c.receiver.port
-    fifo_push(c.receiver.queue, message)
+    new_message := message_clone(message)
+    new_message.port = c.receiver.port
+    fifo_push(c.receiver.queue, new_message)
 }
 
 // For all children that are ready to process messages, consumes a message
