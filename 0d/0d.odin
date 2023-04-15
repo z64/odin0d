@@ -191,8 +191,6 @@ dispatch_children :: proc(container: ^Eh) {
     }
 }
 
-import "core:runtime"
-
 route :: proc(container: ^Eh, from: ^Eh, message: Message_Untyped) {
     from_sender := Sender{from, message.port}
     sent := false
