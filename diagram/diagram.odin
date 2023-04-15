@@ -1,3 +1,23 @@
+/*
+
+This package parses diagrams in `MxGraph` format, returning structured
+information for interpreting the diagram into control flow diagrams.
+
+Primarily tested against diagrams produced by https://draw.io.
+Other sources may or may not work.
+
+Currently the cells parsed by this package include:
+
+- Rects
+- Rhombus
+- Ellipse
+- Arrow
+
+All other information in the diagram is ignored.
+
+The cells themselves may have any value, and be styled in any manner.
+
+*/
 package diagram
 
 import "core:encoding/xml"
@@ -5,6 +25,8 @@ import "core:strings"
 import "core:slice"
 import "core:os"
 
+// Reads the given XML file, producing a set of pages of each diagram
+// contained within.
 read_from_xml_file :: proc(path: string) -> (pages: []Page, ok: bool) {
     file := os.read_entire_file(path) or_return
 
