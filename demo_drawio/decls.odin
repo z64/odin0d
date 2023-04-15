@@ -73,28 +73,28 @@ collect_up_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         source_port_ellipse := cells[cell.source]
         if source_port_ellipse.type != .Ellipse do continue
 
-        target_rhombus_cell := cells[cell.target]
-        if target_rhombus_cell.type != .Rhombus do continue
+        target_rhombus := cells[cell.target]
+        if target_rhombus.type != .Rhombus do continue
 
         decl.source_port = source_port_ellipse.value
-        decl.target_port = target_rhombus_cell.value
+        decl.target_port = target_rhombus.value
 
-        source_cell_arrow: dg.Cell
+        source_arrow: dg.Cell
         found := false
 
         for c in cells {
             if c.type == .Arrow && c.target == source_port_ellipse.id {
-                source_cell_arrow = c
+                source_arrow = c
                 found = true
                 break
             }
         }
         if !found do break
 
-        source_cell := cells[source_cell_arrow.source]
-        if source_cell.type != .Rect do continue
+        source := cells[source_arrow.source]
+        if source.type != .Rect do continue
 
-        decl.source = source_cell.value
+        decl.source = source.value
 
         append(decls, decl)
     }
@@ -112,21 +112,21 @@ collect_across_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         decl: Connect_Decl
         decl.dir = .Across
 
-        source_ellipse_cell := cells[cell.source]
-        target_ellipse_cell := cells[cell.target]
-        if source_ellipse_cell.type != .Ellipse do continue
-        if target_ellipse_cell.type != .Ellipse do continue
+        source_ellipse := cells[cell.source]
+        target_ellipse := cells[cell.target]
+        if source_ellipse.type != .Ellipse do continue
+        if target_ellipse.type != .Ellipse do continue
 
-        decl.source_port = source_ellipse_cell.value
-        decl.target_port = target_ellipse_cell.value
+        decl.source_port = source_ellipse.value
+        decl.target_port = target_ellipse.value
 
-        source_cell_arrow: dg.Cell
-        target_cell_arrow: dg.Cell
+        source_arrow: dg.Cell
+        target_arrow: dg.Cell
 
         found := false
         for c in cells {
-            if c.type == .Arrow && c.target == source_ellipse_cell.id {
-                source_cell_arrow = c
+            if c.type == .Arrow && c.target == source_ellipse.id {
+                source_arrow = c
                 found = true
                 break
             }
@@ -135,21 +135,21 @@ collect_across_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
 
         found = false
         for c in cells {
-            if c.type == .Arrow && c.source == target_ellipse_cell.id {
-                target_cell_arrow = c
+            if c.type == .Arrow && c.source == target_ellipse.id {
+                target_arrow = c
                 found = true
                 break
             }
         }
         if !found do continue
 
-        source_cell := cells[source_cell_arrow.source]
-        target_cell := cells[target_cell_arrow.target]
-        if source_cell.type != .Rect do continue
-        if target_cell.type != .Rect do continue
+        source := cells[source_arrow.source]
+        target := cells[target_arrow.target]
+        if source.type != .Rect do continue
+        if target.type != .Rect do continue
 
-        decl.source = source_cell.value
-        decl.target = target_cell.value
+        decl.source = source.value
+        decl.target = target.value
 
         append(decls, decl)
     }
@@ -167,31 +167,31 @@ collect_down_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         decl: Connect_Decl
         decl.dir = .Down
 
-        source_rhombus_cell := cells[cell.source]
-        if source_rhombus_cell.type != .Rhombus do continue
+        source_rhombus := cells[cell.source]
+        if source_rhombus.type != .Rhombus do continue
 
-        target_cell_ellipse := cells[cell.target]
-        if target_cell_ellipse.type != .Ellipse do continue
+        target_ellipse := cells[cell.target]
+        if target_ellipse.type != .Ellipse do continue
 
-        decl.source_port = source_rhombus_cell.value
-        decl.target_port = target_cell_ellipse.value
+        decl.source_port = source_rhombus.value
+        decl.target_port = target_ellipse.value
 
-        target_cell_arrow: dg.Cell
+        target_arrow: dg.Cell
         found := false
 
         for c in cells {
-            if c.type == .Arrow && c.source == target_cell_ellipse.id {
-                target_cell_arrow = c
+            if c.type == .Arrow && c.source == target_ellipse.id {
+                target_arrow = c
                 found = true
                 break
             }
         }
         if !found do break
 
-        target_cell := cells[target_cell_arrow.target]
-        if target_cell.type != .Rect do continue
+        target := cells[target_arrow.target]
+        if target.type != .Rect do continue
 
-        decl.target = target_cell.value
+        decl.target = target.value
 
         append(decls, decl)
     }
@@ -208,15 +208,14 @@ collect_through_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         decl: Connect_Decl
         decl.dir = .Through
 
-        source_rhombus_cell := cells[cell.source]
-        target_rhombus_cell := cells[cell.target]
-        if source_rhombus_cell.type != .Rhombus do continue
-        if target_rhombus_cell.type != .Rhombus do continue
+        source_rhombus := cells[cell.source]
+        target_rhombus := cells[cell.target]
+        if source_rhombus.type != .Rhombus do continue
+        if target_rhombus.type != .Rhombus do continue
 
-        decl.source_port = source_rhombus_cell.value
-        decl.target_port = target_rhombus_cell.value
+        decl.source_port = source_rhombus.value
+        decl.target_port = target_rhombus.value
 
         append(decls, decl)
     }
 }
-
