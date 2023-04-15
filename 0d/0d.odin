@@ -110,7 +110,7 @@ make_leaf_with_data :: proc(name: string, data: ^$Data, handler: proc(^Eh, Messa
 // Sends a message on the given `port` with `data`, placing it on the output
 // of the given component.
 send :: proc(eh: ^Eh, port: string, data: $Data) {
-    data_copy := new_clone(datum)
+    data_copy := new_clone(data)
 
     msg := Message_Untyped {
         port  = port,
