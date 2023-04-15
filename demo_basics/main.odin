@@ -17,28 +17,7 @@ send           :: zd.send
 output_list    :: zd.output_list
 
 main :: proc() {
-    fmt.println("--- WrappedEcho")
-    {
-        top := make_container("Echo")
-
-        echo := make_leaf("0",
-            proc(eh: ^Eh, message: Message(string)) {
-                send(eh, "stdout", message.datum)
-            },
-        )
-
-        top.children = {
-            echo,
-        }
-
-        top.connections = {
-            {.Down, {nil, "stdin"},              {&top.children[0].input, "stdin"}},
-            {.Up,   {top.children[0], "stdout"}, {&top.output, "stdout"}},
-        }
-
-        top.handler(top, {"stdin", "hello"})
-        print_output_list(output_list(top))
-    }
+    fmt.println("*** Handmade Visibility Jam ***")
 
     fmt.println("--- WrappedEcho2")
     {
