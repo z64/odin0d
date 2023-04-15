@@ -17,25 +17,6 @@ send           :: zd.send
 output_list    :: zd.output_list
 
 main :: proc() {
-    print_output_list :: proc(list: []zd.Message_Untyped) {
-        write_rune   :: strings.write_rune
-        write_string :: strings.write_string
-
-        sb: strings.Builder
-        defer strings.builder_destroy(&sb)
-
-        write_rune(&sb, '[')
-        for msg, idx in list {
-            if idx > 0 {
-                write_string(&sb, ", ")
-            }
-            fmt.sbprintf(&sb, "{{%s, %v}", msg.port, msg.datum)
-        }
-        strings.write_rune(&sb, ']')
-
-        fmt.println(strings.to_string(sb))
-    }
-
     fmt.println("--- WrappedEcho")
     {
         top := make_container("Echo")
@@ -228,4 +209,23 @@ main :: proc() {
         top.handler(top, {"stdin", "a"})
         print_output_list(output_list(top))
     }
+}
+
+print_output_list :: proc(list: []zd.Message_Untyped) {
+    write_rune   :: strings.write_rune
+    write_string :: strings.write_string
+
+    sb: strings.Builder
+    defer strings.builder_destroy(&sb)
+
+    write_rune(&sb, '[')
+    for msg, idx in list {
+        if idx > 0 {
+            write_string(&sb, ", ")
+        }
+        fmt.sbprintf(&sb, "{{%s, %v}", msg.port, msg.datum)
+    }
+    strings.write_rune(&sb, ']')
+
+    fmt.println(strings.to_string(sb))
 }
