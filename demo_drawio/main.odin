@@ -12,7 +12,7 @@ send           :: zd.send
 output_list    :: zd.output_list
 
 passthrough :: proc(eh: ^Eh, msg: Message(string)) {
-    fmt.println(eh.name, "/", msg.port, "=", msg.datum)
+    fmt.println("Echo -", eh.name, "/", msg.port, "=", msg.datum)
     send(eh, "stdout", msg.datum)
 }
 
@@ -30,4 +30,24 @@ main :: proc() {
 
     main_container := component_registry["main"]
     main_container.handler(main_container, {"stdin", "hello!"})
+    print_output_list(output_list(main_container))
+}
+
+print_output_list :: proc(list: []zd.Message_Untyped) {
+    write_rune   :: strings.write_rune
+    write_string :: strings.write_string
+
+    sb: strings.Builder
+    defer strings.builder_destroy(&sb)
+
+    write_rune(&sb, '[')
+    for msg, idx in list {
+        if idx > 0 {
+            write_string(&sb, ", ")
+        }
+        fmt.sbprintf(&sb, "{{%s, %v}", msg.port, msg.datum)
+    }
+    strings.write_rune(&sb, ']')
+
+    fmt.println(strings.to_string(sb))
 }
