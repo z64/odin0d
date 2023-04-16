@@ -84,7 +84,8 @@ print_output_list :: proc(list: []zd.Message_Untyped) {
         if idx > 0 {
             write_string(&sb, ", ")
         }
-        fmt.sbprintf(&sb, "{{%s, %v}", msg.port, msg.datum)
+        a := any{msg.datum, msg.datum_type_id}
+        fmt.sbprintf(&sb, "{{%s, %v}", msg.port, a)
     }
     strings.write_rune(&sb, ']')
 
