@@ -13,3 +13,8 @@ make: *** [rundrawio] Abort trap: 6
 $ 
 
 using diagram (screenshot):
+
+---
+
+bvisness — Yesterday at 8:14 AM
+Jammers - don’t forget that your Handmade Network project page will be your submission at the end! If you link your Discord account in your profile settings, you can use your project’s tag in project-showcase to automatically post there.
