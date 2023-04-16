@@ -7,6 +7,10 @@ build: demo_basics.bin demo_drawio.bin
 run: build
 	./demo_basics.bin
 	./demo_drawio.bin
+runbasic: build
+	./demo_basics.bin
+rundrawio: build
+	./demo_drawio.bin
 
 check:
 	odin check demo_basics
