@@ -7,6 +7,7 @@ import zd "../0d"
 Eh             :: zd.Eh
 Message        :: zd.Message
 make_container :: zd.make_container
+make_message   :: zd.make_message
 make_leaf      :: zd.make_leaf
 send           :: zd.send
 output_list    :: zd.output_list
@@ -28,9 +29,10 @@ main :: proc() {
 
     register_containers(&component_registry, "example.drawio")
 
+    top_msg := make_message("stdin", "hello!")
+
     main_container := component_registry["main"]
-    main_container.handler(main_container, {"stdin", "hello!"})
-    print_output_list(output_list(main_container))
+    main_container.handler(main_container, top_msg)
 }
 
 print_output_list :: proc(list: []zd.Message_Untyped) {

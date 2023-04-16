@@ -11,6 +11,7 @@ import zd "../0d"
 
 Eh             :: zd.Eh
 Message        :: zd.Message
+make_message   :: zd.make_message
 make_container :: zd.make_container
 make_leaf      :: zd.make_leaf
 send           :: zd.send
@@ -41,7 +42,7 @@ main :: proc() {
             {.Up,     {top.children[1], "stdout"}, {&top.output, "stdout"}},
         }
 
-        top.handler(top, {"stdin", "hello"})
+	top.handler(top, make_message("stdin", "hello"))
         print_output_list(output_list(top))
     }
 
@@ -65,7 +66,7 @@ main :: proc() {
             {.Up,   {top.children[1], "stdout"}, {&top.output, "stdout"}},
         }
 
-        top.handler(top, {"stdin", "hello"})
+	top.handler(top, make_message("stdin", "hello"))
         print_output_list(output_list(top))
     }
 
