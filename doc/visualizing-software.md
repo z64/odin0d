@@ -1,4 +1,29 @@
 # Visualizing Software
+- LEGO®-like software components snap together to form apps
+- Odin implementation
+- draw.io for editing programs
+- begin with ultra-simple examples of Hello World, sequential and parallel
+- progress to full-blown app, a visual pipeline syntax for Linux ("visual shell")
+- 0D library at core (182 lines of Odin, ignoring comments)
+- ## Screenshots
+![[sequential.png]]
+![[parallel.png]]
+![[parallel-collapsed.png]]
+- ## Video
+- ## Install, Use
+	- clone repo https://github.com/guitarvydas/odin0d
+	- read README.md
+	- basically: install draw.io, install Odin, make run
+- ## Closing Thoughts
+- ### Inspiration
+- ### Did It Turn Out Like We'd Hoped?
+- ### What Did We Learn?
+- ### Future
+	- Excalidraw
+	- apps run in-the-browser
+	- edit in-the-browser
+### Team
+## Overview
 The goal of this project is to visualize software components written in the Odin language and to snap components together like LEGO blocks to form software systems.
 
 We don't visualize *every* piece of Odin code, but concentrate on the bare essentials for visualizing and LEGO-ifying code.
@@ -323,7 +348,30 @@ Background: Decades ago, one of the authors created a demo called *vsh* (Visual 
 
 Due to the time limitations, we'll spiral in from the top-down, to re-implement this app.  We'll stop when we run out of time.  Maybe we'll continue to finish this code after the Jam.
 
+![[visualizing-software 2023-04-16 05.03.39.excalidraw.png|400]]
 
+### Scan
+### Check Input
+- noop - throws error if any input is malformed
+- simplistic check during bootstrapping, to see that previous pass, Scan, was working as expected
+### Calc Bounds
+### Mark Directions
+### Match Ports To Components
+### Assign Pipe Numbers to Inputs
+### Assign Pipe Numbers to Outputs
+### Assign FDs
+### Emit Grash
+
+### Previous Version
+https://github.com/guitarvydas/vsh
+- pl_vsh contains PROLOG version
+- cl-vsh contains Common Lisp version
+- grash contains grash.c assembler
+
+This previous version created components as Linux commands as binaries in ~/bin and used Linux/shell/pipelines to run 0D components.
+#### PT temporary
+![[visualizing-software 2023-04-16 05.03.39.excalidraw]]
+![[vsh.excalidraw]]
 
 # Appendices
 ### The Through Connection
