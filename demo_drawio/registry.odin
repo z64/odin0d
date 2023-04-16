@@ -1,47 +1,99 @@
 package demo_drawio
 
+import "core:fmt"
+
 import dg "../diagram"
 import zd "../0d"
 
-Component_Registry :: map[string]^zd.Eh
-
-register_leaves :: proc(r: ^Component_Registry, leaves: []^zd.Eh) {
-    for leaf in leaves {
-        r[leaf.name] = leaf
-    }
+Component_Registry :: struct {
+    initializers: map[string]Initializer,
 }
 
-register_containers :: proc(r: ^Component_Registry, path: string) {
-    diagram_pages, ok := dg.read_from_xml_file(path)
-    assert(ok)
+Container_Initializer :: struct {
+    decl: Container_Decl,
+}
+
+Leaf_Initializer :: struct {
+    name: string,
+    init: proc(name: string) -> ^zd.Eh,
+}
+
+Initializer :: union {
+    Leaf_Initializer,
+    Container_Initializer,
+}
+
+make_component_registry :: proc(leaves: []Leaf_Initializer, container_xml: string) -> Component_Registry {
+    reg: Component_Registry
+
+    for leaf_init in leaves {
+        reg.initializers[leaf_init.name] = leaf_init
+    }
+
+    pages, ok := dg.read_from_xml_file(container_xml)
+    assert(ok, "Failed parsing container XML")
 
     decls := make([dynamic]Container_Decl)
-    for page in diagram_pages {
+    defer delete(decls)
+
+    for page in pages {
         decl := container_decl_from_diagram(page)
         append(&decls, decl)
     }
 
-    // first pass to register empty containers
-    for d in decls {
-        r[d.name] = zd.make_container(d.name)
+    for decl in decls {
+        container_init := Container_Initializer {
+            decl = decl,
+        }
+        reg.initializers[decl.name] = container_init
     }
 
-    // second pass to establish children and connections
-    for d in decls {
-        component := r[d.name]
+    return reg
+}
 
-        children := make([dynamic]^zd.Eh)
-        for child_name in d.children {
-            child_component, ok := r[child_name]
-            if !ok {
-                // Missing child definition (leaf or container)
-            }
-            append(&children, child_component)
+get_component_instance :: proc(reg: Component_Registry, name: string) -> (instance: ^zd.Eh, ok: bool) {
+    initializer: Initializer
+    initializer, ok = reg.initializers[name]
+    if ok {
+        switch init in initializer {
+        case Leaf_Initializer:
+            instance = init.init(name)
+        case Container_Initializer:
+            instance = container_initializer(reg, init.decl)
         }
-        component.children = children[:]
+    }
+    return instance, ok
+}
 
+container_initializer :: proc(reg: Component_Registry, decl: Container_Decl) -> ^zd.Eh {
+    container := zd.make_container(decl.name)
+
+    children := make([dynamic]^zd.Eh)
+
+    // this map is temporarily used to ensure connector pointers into the child array
+    // line up to the same instances
+    child_id_map := make(map[int]^zd.Eh)
+    defer delete(child_id_map)
+
+    // collect children
+    {
+        for child_decl in decl.children {
+            child_instance, ok := get_component_instance(reg, child_decl.name)
+            if !ok {
+                // TODO(z64): warn
+                continue
+            }
+            append(&children, child_instance)
+            child_id_map[child_decl.id] = child_instance
+        }
+        container.children = children[:]
+    }
+
+    // setup connections
+    {
         connectors := make([dynamic]zd.Connector)
-        for c in d.connections {
+
+        for c in decl.connections {
             connector: zd.Connector
             connector.direction = c.dir
 
@@ -59,14 +111,14 @@ register_containers :: proc(r: ^Component_Registry, path: string) {
                 }
                 source_ok = true
 
-                target_component, target_ok = r[c.target]
+                target_component, target_ok = child_id_map[c.target.id]
                 connector.receiver = {
                     &target_component.input,
                     c.target_port,
                 }
             case .Across:
-                source_component, source_ok = r[c.source]
-                target_component, target_ok = r[c.target]
+                source_component, source_ok = child_id_map[c.source.id]
+                target_component, target_ok = child_id_map[c.target.id]
 
                 connector.sender = {
                     source_component,
@@ -78,14 +130,14 @@ register_containers :: proc(r: ^Component_Registry, path: string) {
                     c.target_port,
                 }
             case .Up:
-                source_component, source_ok = r[c.source]
+                source_component, source_ok = child_id_map[c.source.id]
                 connector.sender = {
                     source_component,
                     c.source_port,
                 }
 
                 connector.receiver = {
-                    &component.output,
+                    &container.output,
                     c.target_port,
                 }
                 target_ok = true
@@ -97,7 +149,7 @@ register_containers :: proc(r: ^Component_Registry, path: string) {
                 source_ok = true
 
                 connector.receiver = {
-                    &component.output,
+                    &container.output,
                     c.target_port,
                 }
                 target_ok = true
@@ -107,6 +159,9 @@ register_containers :: proc(r: ^Component_Registry, path: string) {
                 append(&connectors, connector)
             }
         }
-        component.connections = connectors[:]
+
+        container.connections = connectors[:]
     }
+
+    return container
 }

@@ -18,21 +18,22 @@ passthrough :: proc(eh: ^Eh, msg: Message(string)) {
 }
 
 main :: proc() {
-    component_registry: Component_Registry
+    leaves: []Leaf_Initializer = {
+        {
+            name = "Echo",
+            init = proc(name: string) -> ^Eh {
+                return make_leaf(name, passthrough)
+            },
+        },
+    }
 
-    register_leaves(&component_registry, {
-        make_leaf("A", passthrough),
-        make_leaf("B", passthrough),
-        make_leaf("C", passthrough),
-        make_leaf("D", passthrough),
-    })
+    reg := make_component_registry(leaves, "example.drawio")
 
-    register_containers(&component_registry, "example.drawio")
+    main_container, ok := get_component_instance(reg, "main")
+    assert(ok, "Couldn't find main container... check the page name?")
 
-    top_msg := make_message("stdin", "hello!")
-
-    main_container := component_registry["main"]
-    main_container.handler(main_container, top_msg)
+    msg := make_message("stdin", "hello!")
+    main_container.handler(main_container, msg)
 }
 
 print_output_list :: proc(list: []zd.Message_Untyped) {
