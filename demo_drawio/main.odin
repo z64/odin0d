@@ -32,8 +32,9 @@ main :: proc() {
     main_container, ok := get_component_instance(reg, "main")
     assert(ok, "Couldn't find main container... check the page name?")
 
-    msg := make_message("stdin", "hello!")
+    msg := make_message("stdin", "Hello World!")
     main_container.handler(main_container, msg)
+    print_output_list(output_list(main_container))
 }
 
 print_output_list :: proc(list: []zd.Message_Untyped) {

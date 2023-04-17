@@ -1,3 +1,8 @@
+
+---
+
+
+
 # Visualizing Software
 - LEGO®-like software components snap together to form apps
 - Odin implementation
@@ -6,15 +11,11 @@
 - progress to full-blown app, a visual pipeline syntax for Linux ("visual shell")
 - 0D library at core (182 lines of Odin, ignoring comments)
 - ## Screenshots
-
-![sequential.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/9d124f15-4e9d-446e-9743-0485ff51de63/sequential.png)
-
-![parallel.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/afc00b0f-2935-4c7f-b589-e81062004a3b/parallel.png)
-
-![parallel-collapsed.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/9b878085-880e-48f4-97b7-a349d6a9da79/parallel-collapsed.png)
-
+![[sequential.png]]
+![[parallel.png]]
+![[parallel-collapsed.png]]
 ## Video
-TBD (soon - figuring out how to upload)
+TBD (soon)
 ## Install, Use
 	- clone repo https://github.com/guitarvydas/odin0d
 	- read README.md
@@ -30,6 +31,7 @@ TBD (soon - figuring out how to upload)
 	- Ohm-JS component, Mithril component, etc, etc.
 ### Team
 - Paul Tarvydas - 0d author ([Programming Simplicity Blog](https://publish.obsidian.md/programmingsimplicity/), [GitHub](https://github.com/guitarvydas))
+
 - Zac Nowicki - Odin Implementarion ([Kagi](https://kagi.com), [GitHub](https://github.com/z64))
 
 ## Overview
@@ -58,7 +60,6 @@ In this project, we demonstrate the aspects of 0D and of intrepreting diagrams. 
 
 ## Basic Concepts Simplified
 
-
 A *function* is a blob of code.  
 
 Here is a simple example of a function - Echo - that simply returns whatever it receives as input.
@@ -77,24 +78,23 @@ Basically, Echo is a `proc` that receives a Message.  As a reaction, the `proc` 
 In this code, Echo uses the `send` function instead of using `return` to return a value.
 
 To make *functions* into *software components*, we simply add input ports and output ports, e.g.
-![fig1.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/be960cd0-17e5-4240-8c82-5c6561bce42b/fig1.png)
+
+![[fig1.png]]
 
 This basic example is so simple that we need only one input port and only one output port.  In general, though *software components* can have 0, 1, 2, 3, 4, ... input ports and 0, 1, 2, 3, 4, ... output ports.
 
 *Software Components* are completely independent from on another and can be scheduled in any way.  We use arrows to reprsent messages flowing between components.
 
 ### Sequential Arrangement
-![fig2.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/9dd60445-4388-409e-aba1-b79a8279c1a2/fig2.png)
+![[fig2.png]]
 
 ### Parallel Arrangement
-
-![fig3.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/be55a583-eb15-4e6d-89fb-2a3919ff06d0/fig3.png)
+![[fig3.png]]
 ### Container Components
 In the diagrams above, the input arrows seem to come from nowhere and the output arrows seem to go nowhere.
 
 We simply need to wrap the above diagrams in another component.
-![fig4.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/932b4b95-afd6-4807-8b98-409856b2ce77/fig4.png)
-
+![[fig4.png]]
 
 We call these kind of *wrapper* components, *Container* components.
 
@@ -103,7 +103,6 @@ Components that aren't *wrappers* are called *Leaf* components.
 ### How Do You Write This In Odin?
 We wrote Odin procedures for the above diagrams.  
 
-### Code
 ```
 package zd
 
@@ -333,10 +332,6 @@ An *up* connection is used to send messages from one child to the output of its 
 
 In this example, output from the 1th child's "stdout" port is deposited on top's "stdout" output port.
 
-#### Summary of "zd" Package (kagi.com Summarizer)
-This document presents a package called "zd" that provides a framework for building event-driven systems in the Odin programming language. The package includes several data structures and procedures for creating and managing event handlers (Eh), which can be either containers or leaves. Containers can have child Eh instances and connections to other Eh instances, while leaves are standalone handlers. The package also includes a FIFO data structure for message queues and a Connector data structure for connecting Eh instances. The procedures provided by the package include methods for enqueueing and dequeuing messages, clearing message queues, and checking if queues are empty. The package also includes a container_dispatch_children procedure for routing messages to child Eh instances and a container_route procedure for depositing messages into Connector instances. Finally, the package includes a container_any_child_ready procedure for checking if any child Eh instances are ready to receive messages and a container_child_is_ready procedure for checking if a specific Eh instance is ready to receive messages.
-
-
 ## How Do We Write This Program In Draw.IO?
 We use ellipses for ports, rectangles for components, rhombuses for container ports and arrows for connections.
 
@@ -347,11 +342,12 @@ A limitation of draw.io is that it can't drill-down into Container components.  
 We make do with draw.io's limitations.  To view the insides of a Container, you must select a tab at the bottom of the draw.io editor.  To view the insides of a Leaf, you have to open your favourite text editor on the Odin code that implements the Leaf.  Draw.io doesn't make it easy to arrange Containers in some sort of hierarchy.
 
 ### Sequential Program Written In Draw.IO
-![sequential.example.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/61d45aba-f4dd-4607-8b5b-db83ac795cf2/sequential.example.png)
+
+![[sequential.example.png]]
 
 ### Parallel Program Written in Draw.IO
 
-![parallel.example.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/0b25ae2c-121f-441b-a5be-2d134913329c/parallel.example.png)
+![[parallel.example.png]]
 
 
 ## Full-Blown App
@@ -362,7 +358,8 @@ Background: Decades ago, one of the authors created a demo called *vsh* (Visual 
 2. assembler - to convert compiler output to Linux system calls.
 
 Due to the time limitations, we'll spiral in from the top-down, to re-implement this app.  We'll stop when we run out of time.  Maybe we'll continue to finish this code after the Jam.
-![visualizing-software 2023-04-16 05.03.39.excalidraw.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/0df893ac-6d2d-4727-886a-4e0537c8fa37/visualizing-software_2023-04-16_05.03.39.excalidraw.png)
+
+![[visualizing-software 2023-04-16 05.03.39.excalidraw.png|400]]
 
 ### Scan
 - convert yEd file, pl_vs.graphml, into a factbase 
@@ -935,7 +932,7 @@ This example does not show a 4th kind of connection - *through*.  This kind of c
 
 ## ė
 An ė (pronounced *eh* in ASCII) component is like a *lambda* that has one input queue and one output queue.
-![fig5.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/4afa9b37-d00b-4108-bca8-8c2c886f455a/fig5.png)
+![[fig5.png]]
 
 
 ## 0D
@@ -982,36 +979,3 @@ The Big Secret in this work is the idea that there are 2 kinds of components:
 2. Container -  contains children components and handles all routing between children.
 
 Children cannot refer to other components.  No Name Calling.  This simple rule enhances flexibility. 
-
-https://publish.obsidian.md/programmingsimplicity/2023-04-08-The+Benefits+of+True+Decoupling
-## Feedback
-An interesting outcome of this technique is the use of feedback (which is not the same as recursion).
-https://publish.obsidian.md/programmingsimplicity/2023-04-02-Feedback
-
-## See also
-Versions of 0D have been constructed for Python and for Common Lisp.
-
-As it stands, the Common Lisp version is the most recent version (non-Odin). This version eschews the use of *self*, making 0D amenable to non-OO languages.
-
-see also: Py0D, CL0D.
-
-https://github.com/guitarvydas/py0d
-https://github.com/guitarvydas/cl0d
-
-## Summary (kagi.com Summarizer)
-This document presents a package called "zd" that provides a framework for building event-driven systems in the Odin programming language. The package includes several data structures and procedures for creating and managing event handlers (Eh), which can be either containers or leaves. Containers can have child Eh instances and connections to other Eh instances, while leaves are standalone handlers. The package also includes a FIFO data structure for message queues and a Connector data structure for connecting Eh instances. The procedures provided by the package include methods for enqueueing and dequeuing messages, clearing message queues, and checking if queues are empty. The package also includes a container_dispatch_children procedure for routing messages to child Eh instances and a container_route procedure for depositing messages into Connector instances. Finally, the package includes a container_any_child_ready procedure for checking if any child Eh instances are ready to receive messages and a container_child_is_ready procedure for checking if a specific Eh instance is ready to receive messages.
-
-https://publish.obsidian.md/programmingsimplicity/2023-04-08-The+Benefits+of+True+Decoupling
-## Feedback
-An interesting outcome of this technique is the use of feedback (which is not the same as recursion).
-https://publish.obsidian.md/programmingsimplicity/2023-04-02-Feedback
-
-## See also
-Versions of 0D have been constructed for Python and for Common Lisp.
-
-As it stands, the Common Lisp version is the most recent version (non-Odin). This version eschews the use of *self*, making 0D amenable to non-OO languages.
-
-see also: Py0D, CL0D.
-
-https://github.com/guitarvydas/py0d
-https://github.com/guitarvydas/cl0d
