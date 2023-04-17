@@ -5,16 +5,21 @@ import zd "../0d"
 
 Container_Decl :: struct {
     name:        string,
-    children:    []string,
+    children:    []Elem_Reference,
     connections: []Connect_Decl,
 }
 
 Connect_Decl :: struct {
     dir:         zd.Direction,
-    source:      string,
+    source:      Elem_Reference,
     source_port: string,
-    target:      string,
+    target:      Elem_Reference,
     target_port: string,
+}
+
+Elem_Reference :: struct {
+    name: string,
+    id:   int,
 }
 
 container_decl_from_diagram :: proc(page: dg.Page) -> Container_Decl {
@@ -33,26 +38,16 @@ container_decl_from_diagram :: proc(page: dg.Page) -> Container_Decl {
     return decl
 }
 
-// Children are the unique list of rects on the page
-collect_children :: proc(cells: []dg.Cell) -> []string {
-    children := make([dynamic]string)
+// Children are list of named rects on the page
+collect_children :: proc(cells: []dg.Cell) -> []Elem_Reference {
+    children := make([dynamic]Elem_Reference)
 
     for cell in cells {
         if cell.type != .Rect || cell.value == "" {
             continue
         }
-
-        found := false
-        for c in children {
-            if c == cell.value {
-                found = true
-                break
-            }
-        }
-
-        if !found {
-            append(&children, cell.value)
-        }
+        ref := Elem_Reference{cell.value, cell.id}
+        append(&children, ref)
     }
 
     return children[:]
@@ -94,7 +89,7 @@ collect_up_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         source := cells[source_arrow.source]
         if source.type != .Rect do continue
 
-        decl.source = source.value
+        decl.source = {source.value, source.id}
 
         append(decls, decl)
     }
@@ -148,8 +143,8 @@ collect_across_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         if source.type != .Rect do continue
         if target.type != .Rect do continue
 
-        decl.source = source.value
-        decl.target = target.value
+        decl.source = {source.value, source.id}
+        decl.target = {target.value, target.id}
 
         append(decls, decl)
     }
@@ -191,7 +186,7 @@ collect_down_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         target := cells[target_arrow.target]
         if target.type != .Rect do continue
 
-        decl.target = target.value
+        decl.target = {target.value, target.id}
 
         append(decls, decl)
     }

@@ -1,0 +1,172 @@
+{
+  "main": {
+    "id": "34855791ea60d71d",
+    "type": "split",
+    "children": [
+      {
+        "id": "789a2615b14beb26",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "da57b1852bf09224",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "visualizing-software.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "eef8973c444d9c16",
+    "type": "split",
+    "children": [
+      {
+        "id": "9be027b3fd2003d0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fce6dcbb3081b908",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "ffa52535ba5310e1",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "5f77bfe7087beeee",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "d90d3cf963767c98",
+    "type": "split",
+    "children": [
+      {
+        "id": "3ab8b22501013e7f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c04e1481278b1338",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "visualizing-software.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "3fd0da4edd8c3578",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "visualizing-software.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "3a935177a3d5691c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "8aec0c06a434e30c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "visualizing-software.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "obsidian-excalidraw-plugin:Create new drawing": false
+    }
+  },
+  "active": "da57b1852bf09224",
+  "lastOpenFiles": [
+    "odin0d-video-basics.mov",
+    "#visualizing-software.md#",
+    "old-visualizing-software.md",
+    "parallel.png",
+    "visualizing-software.md",
+    "sequential.png",
+    "parallel-collapsed.png",
+    "Excalidraw/visualizing-software 2023-04-16 05.03.39.excalidraw.md",
+    "Excalidraw/visualizing-software 2023-04-16 05.03.39.excalidraw.png",
+    "vsh.excalidraw",
+    "Excalidraw/visualizing-software 2023-04-16 04.47.46.excalidraw.md",
+    "Excalidraw/visualizing-software 2023-04-16 04.39.11.excalidraw.md",
+    "Excalidraw/visualizing-software 2023-04-16 04.39.11.excalidraw.png",
+    "Excalidraw",
+    "fig5.png",
+    "2023-04-08-The Benefits of True Decoupling 2023-04-09 17.53.46.excalidraw.png",
+    "fig4.png",
+    "2023-04-15-Visualizing Software 2023-04-15 07.59.45.excalidraw.png",
+    "fig3.png"
+  ]
+}
