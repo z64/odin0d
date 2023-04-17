@@ -14,20 +14,27 @@
 ![parallel-collapsed.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/9b878085-880e-48f4-97b7-a349d6a9da79/parallel-collapsed.png)
 
 ## Video
-TBD (soon - figuring out how to upload)
+TBD (soon - YouTube error durin upload)
 ## Install, Use
-	- clone repo https://github.com/guitarvydas/odin0d
-	- read README.md
-	- basically: install draw.io, install Odin, make run
+- clone repo https://github.com/guitarvydas/odin0d
+- read README.md
+- basically: install draw.io, install Odin, make run
 ## Closing Thoughts
 ### Inspiration
+- Moore's Law for hardware but not for software
+- observation that all components in hardware are asynchronous whereas all functions/libraries in software are synchronous
+- UNIX pipelines
 ### Did It Turn Out Like We'd Hoped?
+- ran out of time and did not work on vsh much
 ### What Did We Learn?
+- significantly simplified diagram interpreter code by drawing diagrams differently
+- snapping software Components together is easy when 0D is employed
+- 'self' leads to generalized mutation, but, is not actually needed
 ### Future
-	- Excalidraw
-	- apps run in-the-browser
-	- edit in-the-browser
-	- Ohm-JS component, Mithril component, etc, etc.
+- Excalidraw, consider compiling JSON produced by Excalidraw
+- 0D apps running in-the-browser
+- edit diagrams in-the-browser
+- wish-list of components: Ohm-JS, Mithril, PROLOG/unification/miniKanren, etc, etc.
 ### Team
 - Paul Tarvydas - 0d author ([Programming Simplicity Blog](https://publish.obsidian.md/programmingsimplicity/), [GitHub](https://github.com/guitarvydas))
 - Zac Nowicki - Odin Implementarion ([Kagi](https://kagi.com), [GitHub](https://github.com/z64))
@@ -77,6 +84,7 @@ Basically, Echo is a `proc` that receives a Message.  As a reaction, the `proc` 
 In this code, Echo uses the `send` function instead of using `return` to return a value.
 
 To make *functions* into *software components*, we simply add input ports and output ports, e.g.
+
 ![fig1.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/be960cd0-17e5-4240-8c82-5c6561bce42b/fig1.png)
 
 This basic example is so simple that we need only one input port and only one output port.  In general, though *software components* can have 0, 1, 2, 3, 4, ... input ports and 0, 1, 2, 3, 4, ... output ports.
@@ -84,6 +92,7 @@ This basic example is so simple that we need only one input port and only one ou
 *Software Components* are completely independent from on another and can be scheduled in any way.  We use arrows to reprsent messages flowing between components.
 
 ### Sequential Arrangement
+
 ![fig2.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/9dd60445-4388-409e-aba1-b79a8279c1a2/fig2.png)
 
 ### Parallel Arrangement
@@ -93,6 +102,7 @@ This basic example is so simple that we need only one input port and only one ou
 In the diagrams above, the input arrows seem to come from nowhere and the output arrows seem to go nowhere.
 
 We simply need to wrap the above diagrams in another component.
+
 ![fig4.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/932b4b95-afd6-4807-8b98-409856b2ce77/fig4.png)
 
 
@@ -347,6 +357,7 @@ A limitation of draw.io is that it can't drill-down into Container components.  
 We make do with draw.io's limitations.  To view the insides of a Container, you must select a tab at the bottom of the draw.io editor.  To view the insides of a Leaf, you have to open your favourite text editor on the Odin code that implements the Leaf.  Draw.io doesn't make it easy to arrange Containers in some sort of hierarchy.
 
 ### Sequential Program Written In Draw.IO
+
 ![sequential.example.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/61d45aba-f4dd-4607-8b5b-db83ac795cf2/sequential.example.png)
 
 ### Parallel Program Written in Draw.IO
@@ -362,7 +373,10 @@ Background: Decades ago, one of the authors created a demo called *vsh* (Visual 
 2. assembler - to convert compiler output to Linux system calls.
 
 Due to the time limitations, we'll spiral in from the top-down, to re-implement this app.  We'll stop when we run out of time.  Maybe we'll continue to finish this code after the Jam.
+
 ![visualizing-software 2023-04-16 05.03.39.excalidraw.png](https://hmn-assets-2.ams3.cdn.digitaloceanspaces.com/0df893ac-6d2d-4727-886a-4e0537c8fa37/visualizing-software_2023-04-16_05.03.39.excalidraw.png)
+
+See github repo doc/vsh.md for further detailed discussion
 
 ### Scan
 - convert yEd file, pl_vs.graphml, into a factbase 
@@ -373,90 +387,17 @@ Due to the time limitations, we'll spiral in from the top-down, to re-implement 
 - simplistic check during bootstrapping, to see that previous pass, Scan, was working as expected
 ### Calc Bounds
 - calculate bounding boxes for all closed figures (not arrows)
-```
-...
-createBoundingBoxes :-
-  forall(geometry_x(ID, X), createBoundingBox(ID, X)).
-createBoundingBox(ID, X) :-
-  geometry_y(ID, Y),
-  geometry_w(ID, Width),
-  geometry_h(ID, Height),
-  asserta(bounding_box_left(ID,X)),
-  asserta(bounding_box_top(ID,Y)),
-  Right is X + Width,
-  Bottom is Y + Height,
-  asserta(bounding_box_right(ID,Right)),
-  asserta(bounding_box_bottom(ID,Bottom)).
-...
-```
-- capitalized variables are Logic Variables (engine performs assignment during pattern matching)
-- Logic Variables are "holes" that get filled in during pattern matching
-- all Logic Variables with the same name must contain the same value for the whole relation to succeed (the engine keeps trying matches until everything is self-consistent)
-- `asserta` creates new relations in the factbase
-- elided code reads in the factbase from *stdin* at beginning, and, writes out the factbase to *stdout* when done
 ### Mark Directions
-a "source" is a component pin that produces events (IPs) and a "sink" is the destination
+A "source" is a component pin that produces events (IPs) and a "sink" is the destination
 for events. We avoid the more obvious terms "input" and "output" because the terms are
 ambiguous in hierarchical components, e.g. an input pin on the outside of a hierarchial
 component looks like it "outputs" events to any components contained within the hierarchical component.
 yEd creates edges with clearly delineated sources and sinks, hence, this pass is
 redundant for this particular application (using yEd); just read and re-emit all facts
 ### Match Ports To Components
-```
-match_ports :-
-    % assign a parent component to every port, port must intersect parent's bounding-box
-    % unimplemented semantic check: check that every port has exactly one parent
-    forall(eltype(PortID, port),assign_parent_for_port(PortID)).
-
-assign_parent_for_port(PortID) :-
-    bounding_box_left(PortID, Left),
-    bounding_box_top(PortID, Top),
-    bounding_box_right(PortID, Right),
-    bounding_box_bottom(PortID, Bottom),
-    bounding_box_left(ParentID, PLeft),
-    bounding_box_top(ParentID, PTop),
-    bounding_box_right(ParentID, PRight),
-    bounding_box_bottom(ParentID, PBottom),
-    eltype(ParentID, box),
-    intersects(Left, Top, Right, Bottom, PLeft, PTop, PRight, PBottom),
-    asserta(parent(PortID, ParentID)).
-
-intersects(PortLeft, PortTop, PortRight, PortBottom, ParentLeft, ParentTop, ParentRight, ParentBottom) :-
-    % true if child bounding box center intersect parent bounding box
-    % bottom is >= top in this coord system
-    % the code below only checks to see if all edges of the port are within the parent box
-    % this should be tightened up to check that a port actually intersects one of the edges of the parent box
-    PortLeft =< ParentRight,
-    PortRight >= ParentLeft,
-    PortTop =< ParentBottom,
-    PortBottom >= ParentTop.
-```
+Assign a parent component to every port.
 ### Assign Pipe Numbers to Inputs
-```
-main :-
-    g_assign(counter,0),
-    readFB(user_input),
-    forall(sink(_,Pin),assign_pipe_number(Pin)),
-    g_read(counter,N),
-    asserta(npipes(N)),
-    writeFB,
-    halt.
-
-assign_pipe_number(Pin) :-
-    g_read(counter,Old),
-    asserta(pipeNum(Pin,Old)),
-    inc(counter,_).
-```
 ### Assign Pipe Numbers to Outputs
-```
-aopn(P) :- 
-    sink(E,P), 
-    pipeNum(P,I),
-    source(E,O),
-    asserta(pipeNum(O,I)).
-    
-writeterm(Term) :- current_output(Out), write_term(Out, Term, []), write(Out, '.'), nl.
-```
 ### Assign FDs
 ```
 % Assigns FD's to each port.  Special cases: "in" is assigned 0, "out"
@@ -471,114 +412,12 @@ writeterm(Term) :- current_output(Out), write_term(Out, Term, []), write(Out, '.
 % where "pipe" and "fd" are integers.  The (x . y) notation represents a
 % pair (2-tuple).
 % 
-
-main :-
-    g_assign(fdnum,3),  % non-special case fd's start at 3 and up to maximum
-    readFB(user_input),
-    forall(portName(P,in),assign_sink_fd(P,0)), % stdin == 0
-    forall(portName(P,out),assign_source_fd(P,1)), % stdout == 1
-    forall(portName(P,err),assign_source_fd(P,2)), % stderr == 2
-
-    %-- still thinking about this one - what about non-std fd's?
-    %-- are the ports per-component?  Are they named at the architectural level?
-
-    writeFB,
-    halt.
-
-assign_source_fd(P,N) :-
-    %write(P), write(' '), write(N), nl,
-    asserta(sourcefd(P,N)).
-
-assign_sink_fd(P,N) :-
-    %write(P), write(' '), write(N), nl,
-    asserta(sinkfd(P,N)).
 ```
 ### Emit Grash
-This version compiled yEd diagrams to .gsh source code.
+This earlier version of *vsh* compiled yEd diagrams to .gsh source code.
 
-Grash.c interpreted the .gsh source code at runtime and called the appropriate Linux system calls.
-
-```
-main :-
-    readFB(user_input),
-    write('#name '),
-    component(Name),
-    write(Name),
-    write('.gsh'),
-    nl,
-    npipes(Npipes),
-    write('pipes '),
-    write(Npipes),
-    nl,
-    forall(kind(ID,_),emitComponent(ID)),
-    halt.
-
-writeIn(In) :-
-    writeSpaces,
-    portName(In,in),
-    pipeNum(In,Pipe),
-    write('stdinPipe'),
-    write(' '),
-    write(Pipe),
-    nl.
-
-writeOut(Out) :-
-    writeSpaces,
-    portName(Out,out),
-    pipeNum(Out,Pipe),
-    write('stdoutPipe'),
-    write(' '),
-    write(Pipe),
-    nl.
-
-writeErr(Out) :-
-    writeSpaces,
-    portName(Out,out),
-    pipeNum(Out,Pipe),
-    write('stderrPipe'),
-    write(' '),
-    write(Pipe),
-    nl.
-
-emitComponent(ID) :-
-    write('fork'),
-    nl,
-    forall(inputOfParent(ID,In),writeIn(In)),
-    forall(outputOfParent(ID,O),writeOut(O)),
-    forall(erroutputOfParent(ID,Out),writeErr(Out)),
-    writeSpaces,
-    writeExec(ID),
-    write(' '),
-    kind(ID,Name),
-    write(Name),
-    nl,
-    write('krof'),
-    nl.
-
-writeSpaces :- char_code(C,32), write(C), write(C).
-
-inputOfParent(P,In) :-
-    parent(In,P),portName(In,in).
-    
-outputOfParent(P,Out) :-
-    parent(Out,P),portName(Out,out).
-    
-erroutputOfParent(P,Out) :-
-    parent(Out,P),portName(Out,err).
-    
-writeExec(ID) :-
-    hasInput(ID),write(exec),!.
-writeExec(_) :-
-    write(exec1st),!.
-
-hasInput(ID) :-
-    eltype(ID,box),
-    parent(Port,ID),
-    eltype(Port,port),
-    sink(_,Port).
-
-```
 ### Grash.c
+Grash.c interprets the .gsh source code at runtime and called the appropriate Linux system calls.
 ```
 /*
   GRAph SHell - a Flow-Based Programming shell
@@ -609,324 +448,12 @@ hasInput(ID) :-
          parent resumes processing commands
 	 child (if not exec'ed) terminates
 */
-
-#define PIPEMAX 100
-#define LINEMAX 1024
-#define ARGVMAX 128
-#define STACKMAX 2
-
-#define READ_END 0
-#define WRITE_END 1
-
-int comment (char *line) {
-  /* return 1 if line begins with # or is empty, otherwise 0 */
-  return line[0] == '#' || line[0] == '\n' || line[0] == '\0';
-}
-
-char *parse (char *cmd, char *line) {
-  /* if command matches, return pointer to first non-whitespace char of args */
-  while (*cmd)
-    if (*cmd++ != *line++)
-      return NULL;
-  while (*line == ' ') line++;
-  return line;
-}
-
-int pipes[PIPEMAX-1][2];
-int usedPipes[PIPEMAX-1];
-int child;
-#define MAIN 1
-#define PARENT 2
-#define CHILD 3
-int state = MAIN;
-int stack[STACKMAX];
-int sp = 0;
-
-void quit (char *m) {
-  perror (m);
-  exit (1);
-}
-
-void push (char *p) {
-  assert (sp < STACKMAX);
-  stack[sp++] = atoi(p);
-}
-
-int pop () {
-  assert (sp > 0);
-  return stack[--sp];
-}
-
-void gclose (char *p) {
-  int i = atoi(p);
-  close(pipes[i][0]);
-  close(pipes[i][1]);
-}
-
-void gdup (char *p) {
-  int fd = atoi(p);
-  int i = pop();
-  int dir = pop();
-  int oppositeDir = ((dir == READ_END) ? WRITE_END : READ_END);
-  dup2 (pipes[i][dir], fd);
-  close(pipes[i][oppositeDir]);  // flows are one-way only
-  usedPipes[i] = 1;
-}
-
-void gdup_std (char *p, int fd, int dir) {
-  int i = atoi(p);
-  int oppositeDir = ((dir == READ_END) ? WRITE_END : READ_END);
-  dup2 (pipes[i][dir], fd);
-  close(pipes[i][oppositeDir]);  // flows are one-way only
-  usedPipes[i] = 1;
-}
-
-void gdup_stdin (char *p) {
-  gdup_std (p, 0, READ_END);
-}
-
-void gdup_stdout (char *p) {
-  gdup_std (p, 1, WRITE_END);
-}
-
-void gdup_stderr(char *p) {
-  gdup_std (p, 2, WRITE_END);
-}
-
-
-int highPipe = -1;
-
-void mkPipes (char *p) {
-  int i = atoi(p);
-  if (i <= 0 || i > PIPEMAX)
-    quit("socket index");
-  highPipe = i - 1;
-  i = 0;
-  while (i <= highPipe)
-    if (pipe (pipes[i++]) < 0)
-      quit ("error opening pipe pair");
-}
-
-void closeAllPipes () {
-  // close all pipes in pipe array owned by the parent
-  int i;
-  for (i = 0 ; i <= highPipe ; i++) {
-    close (pipes[i][READ_END]);
-    close (pipes[i][WRITE_END]);
-  }
-}
-	   
-void closeUnusedPipes () {
-  int i;
-  for (i = 0 ; i <= highPipe ; i++) {
-    if (usedPipes[i] == 0) {
-      close (pipes[i][READ_END]);
-      close (pipes[i][WRITE_END]);
-    }
-  }
-}
-	   
-
-void doFork () {
-  if ((child = fork()) == -1)
-    quit ("fork");
-  state = (child == 0) ? PARENT : CHILD;
-}
-
-void doKrof () {
-  state = MAIN;
-}
-
-char *trim_white_space(char *p) {
-  while (*p == ' ' || *p == '\t' || *p == '\n') {
-    *p++ = '\0';
-  }
-  return p;
-}
-
-void  parseArgs(char *line, int *argc, char **argv) {
-  /* convert the char line into argc/argv */
-  *argc = 0;
-  while (*line != '\0') {
-    line = trim_white_space(line);
-    if (*line == '\0') {
-      break;
-    }
-    *argv++ = line;
-    *argc += 1;
-    while (*line != '\0' && *line != ' ' && 
-	   *line != '\t' && *line != '\n') 
-      line++;
-  }
-  *argv = NULL;
-}
-  
-void appendArgs (int *argc, char **argv, int oargc, char **oargv) {
-  /* tack extra command-line args onto tail of argv, using pointer copies */
-  fprintf (stderr, "oargc=%d\n", oargc);
-  fflush (stderr);
-  if (oargc > 2) {
-    int i = 2;
-    while (i < oargc) {
-      argv[*argc] = oargv[i];
-      *argc += 1;
-      i += 1;
-    }
-    argv[i] = NULL;
-  }
-}
-
-void doExec (char *p, int oargc, char **oargv, int first) {
-  char *argv[ARGVMAX];
-  int argc;
-  pid_t pid;
-  int i;
-  parseArgs (p, &argc, argv);
-  if (first) {
-    appendArgs (&argc, argv, oargc, oargv);
-  }
-  closeUnusedPipes();
-
-  fprintf (stderr, "execing[%d]:", argc);
-  fflush (stderr);
-  for(i=0; i < argc; i+=1) {
-    fprintf (stderr, " %s", argv[i]);
-    fflush (stderr);
-  }
-  fprintf (stderr, "\n");
-  fflush (stderr);
-
-  pid = execvp (argv[0], argv);
-  if (pid < 0) {
-    fprintf (stderr, "exec: %s\n", argv[0]);
-    quit ("exec failed!");
-  }
-}
-
-void interpret (char *line, int argc, char **argv) {
-  char *p;
-
-  line = trim_white_space(line);
-
-  if (comment (line))
-    return;
-
-  switch (state) {
-
-  case CHILD:
-    p = parse ("krof", line);
-    if (p)
-      exit(0);
-    p = parse ("dup", line);
-    if (p) {
-      gdup (p);
-      return;
-    }
-    p = parse ("stdinPipe", line);
-    if (p) {
-      gdup_stdin (p);
-      return;
-    }
-    p = parse ("stdoutPipe", line);
-    if (p) {
-      gdup_stdout (p);
-      return;
-    } 
-    p = parse ("stderrPipe", line);
-    if (p) {
-      gdup_stderr (p);
-      return;
-    }
-    p = parse ("push", line);
-    if (p) {
-      push (p);
-      return;
-    }
-    p = parse ("exec1st", line);
-    if (p) {
-      doExec (p, argc, argv, 1);
-      return;
-    }
-    p = parse ("exec", line);
-    if (p) {
-      doExec (p, argc, argv, 0);
-      return;
-    }
-    quit("can't happen");
-    break;
-
-  case MAIN:
-    p = parse ("pipes", line);
-    if (p) {
-      mkPipes (p);
-      return;
-    }
-    p = parse ("fork", line);
-    if (p) {
-      doFork ();
-      return;
-    }
-    p = parse ("krof", line);
-    if (p)
-      quit ("krof seen in MAIN state (can't happen)");
-    break;
-
-  case PARENT:
-    p = parse ("krof", line);
-    if (p) {
-      doKrof ();
-      return;
-    }
-    return;
-  }
-  quit ("command");
-}
-  
-
-int main (int argc, char **argv) {
-  int r;
-  char line[LINEMAX-1];
-  char *p;
-  FILE *f;
-  pid_t pid;
-  int status;
-
-  if (argc < 2 || argv[1][0] == '-') {
-    f = stdin;
-  } else {
-    f = fopen (argv[1], "r");
-  }
-  if (f == NULL)
-    quit ("usage: grash {filename|-} [args]");
-
-  for (r = 0; r < PIPEMAX; r++) {
-    pipes[r][READ_END] = -1;
-    pipes[r][WRITE_END] = -1;
-    usedPipes[r] = 0;
-  }
-  
-  p = fgets (line, sizeof(line), f);
-  while (p != NULL) {
-    interpret (line, argc, argv);
-    p = fgets (line, sizeof(line), f);
-  }
-  closeAllPipes();
-  while ((pid = wait(&status)) != -1) {
-    fprintf(stderr, "%d exits %d\n", pid, WEXITSTATUS(status));
-  }
-  exit(0);
-}
 ```
 ### Previous Version
 https://github.com/guitarvydas/vsh
 - pl_vsh contains PROLOG version
 - cl-vsh contains Common Lisp version
 - grash contains grash.c assembler
-
-This previous version created components as Linux commands as binaries in ~/bin and used Linux/shell/pipelines to run 0D components.
-#### PT temporary
-![[visualizing-software 2023-04-16 05.03.39.excalidraw]]
-![[vsh.excalidraw]]
 
 # Appendices
 ### The Through Connection
@@ -998,9 +525,7 @@ see also: Py0D, CL0D.
 https://github.com/guitarvydas/py0d
 https://github.com/guitarvydas/cl0d
 
-## Summary (kagi.com Summarizer)
-This document presents a package called "zd" that provides a framework for building event-driven systems in the Odin programming language. The package includes several data structures and procedures for creating and managing event handlers (Eh), which can be either containers or leaves. Containers can have child Eh instances and connections to other Eh instances, while leaves are standalone handlers. The package also includes a FIFO data structure for message queues and a Connector data structure for connecting Eh instances. The procedures provided by the package include methods for enqueueing and dequeuing messages, clearing message queues, and checking if queues are empty. The package also includes a container_dispatch_children procedure for routing messages to child Eh instances and a container_route procedure for depositing messages into Connector instances. Finally, the package includes a container_any_child_ready procedure for checking if any child Eh instances are ready to receive messages and a container_child_is_ready procedure for checking if a specific Eh instance is ready to receive messages.
-
+## Decouling
 https://publish.obsidian.md/programmingsimplicity/2023-04-08-The+Benefits+of+True+Decoupling
 ## Feedback
 An interesting outcome of this technique is the use of feedback (which is not the same as recursion).
