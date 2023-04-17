@@ -11,12 +11,8 @@
             "id": "da57b1852bf09224",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "visualizing-software.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {}
             }
           }
         ]
@@ -85,7 +81,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "visualizing-software.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +97,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "visualizing-software.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -124,9 +118,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "visualizing-software.md"
-              }
+              "state": {}
             }
           }
         ]
@@ -149,11 +141,11 @@
   },
   "active": "da57b1852bf09224",
   "lastOpenFiles": [
+    "visualizing-software.md",
     "odin0d-video-basics.mov",
     "#visualizing-software.md#",
     "old-visualizing-software.md",
     "parallel.png",
-    "visualizing-software.md",
     "sequential.png",
     "parallel-collapsed.png",
     "Excalidraw/visualizing-software 2023-04-16 05.03.39.excalidraw.md",
