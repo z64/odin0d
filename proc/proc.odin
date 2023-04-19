@@ -9,18 +9,20 @@ import "core:fmt"
 
 foreign import libc_ext "system:c"
 
+Pid :: distinct i32
+
 foreign libc_ext {
     execvp  :: proc(file: cstring, argv: [^]cstring)              -> int ---
-    waitpid :: proc(pid: os.Pid, wstatus: rawptr, options: c.int) -> os.Pid ---
-    fork    :: proc()                                             -> os.Pid ---
-    getpid  :: proc()                                             -> os.Pid ---
+    waitpid :: proc(pid: Pid, wstatus: rawptr, options: c.int) -> Pid ---
+    fork    :: proc()                                             -> Pid ---
+    getpid  :: proc()                                             -> Pid ---
 
     system :: proc(command: cstring) -> c.int ---
 
 
     pipe :: proc(fds: [^]os.Handle)             -> c.int ---
     dup2 :: proc(fd: os.Handle, fd2: os.Handle) -> c.int ---
-    kill :: proc(pid: os.Pid, sig: c.int)    -> c.int ---
+    kill :: proc(pid: Pid, sig: c.int)    -> c.int ---
 }
 
 unix_pipe :: proc() -> (read: os.Handle, write: os.Handle) {
@@ -43,7 +45,7 @@ unix_reopen :: proc(fd, fd2: os.Handle) {
 }
 
 Handle :: struct {
-    pid:    os.Pid,
+    pid:    Pid,
     input:  os.Handle,
     output: os.Handle,
     // TODO(z64): err
