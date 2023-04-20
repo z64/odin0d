@@ -1,9 +1,11 @@
 package demo_drawio
 
 import "core:fmt"
+import "core:log"
+import "core:mem"
 import "core:os"
 import "core:strings"
-import "core:mem"
+import "core:time"
 
 import zd "../0d"
 import dg "../diagram"
@@ -30,6 +32,15 @@ Proc_Message :: union {
     process.Handle,
 }
 
+leaf_sleep_init :: proc(name: string) -> ^Eh {
+    return make_leaf(name, leaf_sleep_proc)
+}
+
+leaf_sleep_proc :: proc(eh: ^Eh, message: Message(Proc_Message)) {
+    time.sleep(3 * time.Second)
+    send(eh, "stdout", message.datum)
+}
+
 leaf_process_init :: proc(name: string) -> ^Eh {
     return make_leaf(name, leaf_process_proc)
 }
@@ -39,11 +50,11 @@ leaf_process_proc :: proc(eh: ^Eh, message: Message(Proc_Message)) {
 
     switch message.port {
     case "bang":
-        fmt.println(eh.name)
+        //fmt.println(eh.name)
         handle := process.start(command)
         send(eh, "busy", Proc_Message(handle))
     case "stdin":
-        fmt.println(eh.name)
+        //fmt.println(eh.name)
         handle := process.start(command)
         data := transmute([]byte)message.datum.(string)
         os.write(handle.input, data)
@@ -118,6 +129,10 @@ collect_process_leaves :: proc(path: string, leaves: ^[dynamic]Leaf_Initializer)
 }
 
 main :: proc() {
+    context.logger = log.create_console_logger(
+        opt={.Level, .Time, .Terminal_Color},
+    )
+
     leaves := make([dynamic]Leaf_Initializer)
 
     collect_process_leaves("example.drawio", &leaves)
@@ -135,6 +150,11 @@ main :: proc() {
             }
             return make_leaf(name, debug_proc)
         },
+    })
+
+    append(&leaves, Leaf_Initializer {
+        name = "sleep",
+        init = leaf_sleep_init,
     })
 
     reg := make_component_registry(leaves[:], "example.drawio")
