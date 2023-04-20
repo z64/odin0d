@@ -1,4 +1,4 @@
 #!/bin/bash
 echo begin C 1>&2
 sleep 3
-echo C-from-bash
+echo C-slept-3
