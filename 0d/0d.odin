@@ -3,6 +3,7 @@ package zd
 import "core:container/queue"
 import "core:fmt"
 import "core:mem"
+import "core:log"
 
 // Data for an asyncronous component - effectively, a function with input
 // and output queues of messages.
@@ -71,7 +72,10 @@ make_leaf :: proc{
 make_leaf_simple :: proc(name: string, handler: proc(^Eh, Message($Datum))) -> ^Eh {
     leaf_handler :: proc(eh: ^Eh, untyped_message: Message_Untyped) {
         ok := untyped_message.datum_type_id == typeid_of(Datum)
-        fmt.assertf(ok, "Component %s got message with type %v, expected %v", eh.name, untyped_message.datum_type_id, typeid_of(Datum))
+        if !ok {
+            log.errorf("Component %s got message with type %v, expected %v", eh.name, untyped_message.datum_type_id, typeid_of(Datum))
+            return
+        }
 
         message := Message(Datum) {
             port  = untyped_message.port,
@@ -278,7 +282,11 @@ dispatch_children :: proc(container: ^Eh) {
         if child_is_ready(child) {
             msg, ok := fifo_pop(&child.input)
             assert(ok, "child was ready, but no message in input queue")
+
+            log.debugf("CALL   %s/%s -> %s (0x%p)", container.name, child.name, msg.port, child)
             child.handler(child, msg)
+            log.debugf("RETURN %s/%s -> %s (0x%p)", container.name, child.name, msg.port, child)
+
             route_child_outputs(container, child)
             destroy_message(msg)
         }
