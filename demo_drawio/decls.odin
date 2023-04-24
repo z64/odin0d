@@ -38,26 +38,19 @@ container_decl_from_diagram :: proc(page: dg.Page) -> Container_Decl {
     return decl
 }
 
-// Children are list of named rects on the page
 collect_children :: proc(cells: []dg.Cell) -> []Elem_Reference {
     children := make([dynamic]Elem_Reference)
 
     for cell in cells {
-        if cell.type != .Rect || cell.value == "" {
-            continue
+        if cell.type == .Rect && .Container in cell.flags {
+            ref := Elem_Reference{cell.value, cell.id}
+            append(&children, ref)
         }
-        ref := Elem_Reference{cell.value, cell.id}
-        append(&children, ref)
     }
 
     return children[:]
 }
 
-// Up connentions are from rect, to ellipse, to rhombus
-//
-// <----------o--->
-//   S   T  S   T
-// [] --> () --> <>
 collect_up_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue
@@ -65,41 +58,26 @@ collect_up_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         decl: Connect_Decl
         decl.dir = .Up
 
-        source_port_ellipse := cells[cell.source]
-        if source_port_ellipse.type != .Ellipse do continue
-
         target_rhombus := cells[cell.target]
         if target_rhombus.type != .Rhombus do continue
 
-        decl.source_port = source_port_ellipse.value
+        // NOTE(z64): right now, i allow this to be any shape... might be ok?
+        source_cell := cells[cell.source]
+
+        decl.source_port = source_cell.value
         decl.target_port = target_rhombus.value
 
-        source_arrow: dg.Cell
-        found := false
-
-        for c in cells {
-            if c.type == .Arrow && c.target == source_port_ellipse.id {
-                source_arrow = c
-                found = true
-                break
-            }
+        parent_rect := cells[source_cell.parent]
+        if !(parent_rect.type == .Rect && .Container in parent_rect.flags) {
+            continue
         }
-        if !found do break
 
-        source := cells[source_arrow.source]
-        if source.type != .Rect do continue
-
-        decl.source = {source.value, source.id}
+        decl.source = {parent_rect.value, parent_rect.id}
 
         append(decls, decl)
     }
 }
 
-// Across connections are from rect, to ellipse, to ellipse, to rect
-//
-// <----------o---------->
-//   S   T  S   T  S   T
-// [] --> () --> () --> []
 collect_across_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue
@@ -107,54 +85,28 @@ collect_across_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         decl: Connect_Decl
         decl.dir = .Across
 
-        source_ellipse := cells[cell.source]
-        target_ellipse := cells[cell.target]
-        if source_ellipse.type != .Ellipse do continue
-        if target_ellipse.type != .Ellipse do continue
+        source_port := cells[cell.source]
+        target_port := cells[cell.target]
 
-        decl.source_port = source_ellipse.value
-        decl.target_port = target_ellipse.value
+        decl.source_port = source_port.value
+        decl.target_port = target_port.value
 
-        source_arrow: dg.Cell
-        target_arrow: dg.Cell
-
-        found := false
-        for c in cells {
-            if c.type == .Arrow && c.target == source_ellipse.id {
-                source_arrow = c
-                found = true
-                break
-            }
+        source_rect := cells[source_port.parent]
+        target_rect := cells[target_port.parent]
+        if !(source_rect.type == .Rect && .Container in source_rect.flags) {
+            continue
         }
-        if !found do continue
-
-        found = false
-        for c in cells {
-            if c.type == .Arrow && c.source == target_ellipse.id {
-                target_arrow = c
-                found = true
-                break
-            }
+        if !(target_rect.type == .Rect && .Container in target_rect.flags) {
+            continue
         }
-        if !found do continue
 
-        source := cells[source_arrow.source]
-        target := cells[target_arrow.target]
-        if source.type != .Rect do continue
-        if target.type != .Rect do continue
-
-        decl.source = {source.value, source.id}
-        decl.target = {target.value, target.id}
+        decl.source = {source_rect.value, source_rect.id}
+        decl.target = {target_rect.value, target_rect.id}
 
         append(decls, decl)
     }
 }
 
-// Down connections are from rhombus, to ellipse, to rect
-//
-// <---o---------->
-//   S   T  S   T
-// <> --> () --> []
 collect_down_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue
@@ -165,37 +117,23 @@ collect_down_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
         source_rhombus := cells[cell.source]
         if source_rhombus.type != .Rhombus do continue
 
-        target_ellipse := cells[cell.target]
-        if target_ellipse.type != .Ellipse do continue
+        // NOTE(z64): right now, i allow this to be any shape... might be ok?
+        target_cell := cells[cell.target]
 
         decl.source_port = source_rhombus.value
-        decl.target_port = target_ellipse.value
+        decl.target_port = target_cell.value
 
-        target_arrow: dg.Cell
-        found := false
-
-        for c in cells {
-            if c.type == .Arrow && c.source == target_ellipse.id {
-                target_arrow = c
-                found = true
-                break
-            }
+        parent_rect := cells[target_cell.parent]
+        if parent_rect.type != .Rect && .Container in parent_rect.flags {
+            continue
         }
-        if !found do break
 
-        target := cells[target_arrow.target]
-        if target.type != .Rect do continue
-
-        decl.target = {target.value, target.id}
+        decl.target = {parent_rect.value, parent_rect.id}
 
         append(decls, decl)
     }
 }
 
-// Through connections are between two rhombi
-//
-//   S          T
-// <> -----o---> <>
 collect_through_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue

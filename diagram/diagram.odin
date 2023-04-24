@@ -46,11 +46,13 @@ Cell :: struct {
     mxgraph_id:     string,
     mxgraph_source: string,
     mxgraph_target: string,
+    mxgraph_parent: string,
     value:          string,
     styles:         map[string]string,
     id:             int,
     source:         int,
     target:         int,
+    parent:         int,
     flags:          Flag_Set,
     type:           Cell_Type,
 }
@@ -66,7 +68,7 @@ Cell_Type :: enum {
 Flag_Value :: enum {
     Vertex,
     Edge,
-    Parent,
+    Container,
 }
 
 Flag_Set :: bit_set[Flag_Value]
@@ -95,10 +97,10 @@ cell_from_elem :: proc(elem: xml.Element) -> Cell {
         case "id":     cell.mxgraph_id = attrib.val
         case "source": cell.mxgraph_source = attrib.val
         case "target": cell.mxgraph_target = attrib.val
+        case "parent": cell.mxgraph_parent = attrib.val
         case "value":  cell.value = attrib.val
         case "vertex": incl(&cell.flags, Flag_Value.Vertex)
         case "edge":   incl(&cell.flags, Flag_Value.Edge)
-        case "parent": incl(&cell.flags, Flag_Value.Parent)
         case "style":  cell.styles = style_map(attrib.val)
         }
     }
@@ -115,6 +117,10 @@ cell_from_elem :: proc(elem: xml.Element) -> Cell {
 
     if _, ok := cell.styles["rhombus"]; ok {
         cell.type = .Rhombus
+    }
+
+    if _, ok := cell.styles["container"]; ok {
+        incl(&cell.flags, Flag_Value.Container)
     }
 
     return cell
@@ -158,21 +164,17 @@ diagrams_from_document :: proc(doc: ^xml.Document) -> []Page {
             cell.id = idx
         }
 
-        // connect source/target references
+        // connect source/target references etc.
         for cell in &diagram.cells {
-            if cell.mxgraph_source != "" {
-                for x in diagram.cells {
-                    if x.mxgraph_id == cell.mxgraph_source {
-                        cell.source = x.id
-                    }
+            for x in diagram.cells {
+                if cell.mxgraph_source == x.mxgraph_id {
+                    cell.source = x.id
                 }
-            }
-
-            if cell.mxgraph_target != "" {
-                for x in diagram.cells {
-                    if x.mxgraph_id == cell.mxgraph_target {
-                        cell.target = x.id
-                    }
+                if cell.mxgraph_target == x.mxgraph_id {
+                    cell.target = x.id
+                }
+                if cell.mxgraph_parent == x.mxgraph_id {
+                    cell.parent = x.id
                 }
             }
         }
