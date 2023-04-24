@@ -210,6 +210,11 @@ make_fifo_iterator :: proc(q: ^FIFO) -> FIFO_Iterator {
 }
 
 fifo_iterate :: proc(iter: ^FIFO_Iterator) -> (item: Message_Untyped, idx: int, ok: bool) {
+    if iter.q.len == 0 {
+        ok = false
+        return
+    }
+
     i := (uint(iter.idx)+iter.q.offset) % len(iter.q.data)
     if i < iter.q.len {
         ok = true
