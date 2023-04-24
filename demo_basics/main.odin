@@ -9,18 +9,18 @@ import "core:os"
 import dg "../diagram"
 import zd "../0d"
 
-Eh             :: zd.Eh
-Message        :: zd.Message
-make_message   :: zd.make_message
-make_container :: zd.make_container
-make_leaf      :: zd.make_leaf
-send           :: zd.send
-output_list    :: zd.output_list
+Eh                :: zd.Eh
+Message           :: zd.Message
+make_container    :: zd.make_container
+make_message      :: zd.make_message
+make_leaf         :: zd.make_leaf
+send              :: zd.send
+print_output_list :: zd.print_output_list
 
 main :: proc() {
     fmt.println("*** Handmade Visibility Jam ***")
 
-    fmt.println("--- Sequential")
+    fmt.println("--- Basics: Sequential ---")
     {
         echo_handler :: proc(eh: ^Eh, message: Message(string)) {
             send(eh, "stdout", message.datum)
@@ -43,10 +43,10 @@ main :: proc() {
         }
 
 	top.handler(top, make_message("stdin", "hello"))
-        print_output_list(output_list(top))
+        print_output_list(top)
     }
 
-    fmt.println("--- Parallel")
+    fmt.println("--- Basics: Parallel ---")
     {
         echo_handler :: proc(eh: ^Eh, message: Message(string)) {
             send(eh, "stdout", message.datum)
@@ -67,27 +67,7 @@ main :: proc() {
         }
 
 	top.handler(top, make_message("stdin", "hello"))
-        print_output_list(output_list(top))
+        print_output_list(top)
     }
 
-}
-
-print_output_list :: proc(list: []zd.Message_Untyped) {
-    write_rune   :: strings.write_rune
-    write_string :: strings.write_string
-
-    sb: strings.Builder
-    defer strings.builder_destroy(&sb)
-
-    write_rune(&sb, '[')
-    for msg, idx in list {
-        if idx > 0 {
-            write_string(&sb, ", ")
-        }
-        a := any{msg.datum, msg.datum_type_id}
-        fmt.sbprintf(&sb, "{{%s, %v}", msg.port, a)
-    }
-    strings.write_rune(&sb, ']')
-
-    fmt.println(strings.to_string(sb))
 }

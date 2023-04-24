@@ -3,6 +3,7 @@ package zd
 import "core:container/queue"
 import "core:fmt"
 import "core:mem"
+import "core:strings"
 
 // Data for an asyncronous component - effectively, a function with input
 // and output queues of messages.
@@ -313,4 +314,27 @@ any_child_ready :: proc(container: ^Eh) -> (ready: bool) {
 
 child_is_ready :: proc(eh: ^Eh) -> bool {
     return !fifo_is_empty(eh.output) || !fifo_is_empty(eh.input)
+}
+
+// Utility for printing an array of messages.
+print_output_list :: proc(eh: ^Eh) {
+    write_rune   :: strings.write_rune
+    write_string :: strings.write_string
+
+    sb: strings.Builder
+    defer strings.builder_destroy(&sb)
+
+    write_rune(&sb, '[')
+
+    iter := make_fifo_iterator(&eh.output)
+    for msg, idx in fifo_iterate(&iter) {
+        if idx > 0 {
+            write_string(&sb, ", ")
+        }
+        a := any{msg.datum, msg.datum_type_id}
+        fmt.sbprintf(&sb, "{{%s, %v}", msg.port, a)
+    }
+    strings.write_rune(&sb, ']')
+
+    fmt.println(strings.to_string(sb))
 }
