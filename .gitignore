@@ -10,3 +10,5 @@ junk*
 *.bin
 
 *.mp4
+
+*.dSYM
