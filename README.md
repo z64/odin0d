@@ -45,12 +45,16 @@ You can make your edits according to the [Syntax](#syntax) section, then save th
 
 ### Syntax
 
-The reference syntax implemented by `demo_drawio` is as follows.
+The current reference syntax implemented by `demo_drawio` is as follows:
+
+![Syntax Example](https://cdn.discordapp.com/attachments/602932100508942337/1099957457612185670/image.png)
+
+> Note that what follows is a *reference implementation* of a diagram syntax.
+> Implementations may choose to be more or less strict, interpret the same diagram differently, lint at compile or runtime, etc.
 
 General rules:
 
-- The only things that matter are shape and arrow direction.
-- Components can be in any orientation, size, or style.
+- Components can be in any orientation, size, or colors.
 - Components can have any number of inputs and outputs.
 - You can "fan out" an output to multiple destinations.
 - You can "fan in" an input to a single destination.
@@ -58,24 +62,38 @@ General rules:
 
 #### Components
 
+![Component](https://cdn.discordapp.com/attachments/602932100508942337/1099958520406872164/image.png)
+
 Rectangles on the diagram represent Components.
-The value of the rectangle is an identifier that refers either to native component (Leaf) or another container (page).
+Components are recognized by marking a rectangle as a "container" in draw.io.
 
-![Component](https://cdn.discordapp.com/attachments/602932100508942337/1096872540246380564/image.png)
+The label of the rectangle is an identifier that refers either to native component (Leaf) or another container (page).
 
-- You can have multiple components drawn with the same name.
-  Globally, components with the same name refer to the same leaf code or container.
-- Ellipses with arrows towards the rect represent inputs.
+You can have multiple components drawn with the same name.
+Globally, components with the same name refer to the same leaf code or container.
+
+Ports are recognized as any shape that is a child of this container, that also has some connections:
+
+- Arrows connecting towards the port represent inputs.
   Messages delivered to the input will be seen by the component using the given port name.
-- Ellipses with arrows from the rect represent outputs.
+- Arrows connecting away from the port represent outputs.
   Messages with matching port names will be delivered along that connection.
 
+This allows some flexibility in how you visually configure ports on the component rect.
+
+Ports can have *any* name:
+
+- Any given port is exclusive to that component (aka port names are not global)
+- Input and output ports are exclusive (you can have inputs and outputs with the same names)
+- Multiple ports (input or output) with the same name effectively refer to the same port.
+
 #### Containers
+
+![Container](https://cdn.discordapp.com/attachments/602932100508942337/1099962043857129522/image.png)
 
 Each page of the diagram (tab along bottom of the interface) represents a container.
 The page name is used as the name of the container.
 
-![Container](https://cdn.discordapp.com/attachments/602932100508942337/1096875442482458694/image.png)
 
 Inputs to a container are identified using the Rhombus (diamond) shape.
 The name on the rhombus identifies the input or output port to the container.
@@ -94,10 +112,10 @@ The interpreter looks at the diagram and, using the above rules, interprets the 
 
 In terms of diagram patterns:
 
-- A rhombus, connected to an ellipse, to a rect, is a Down connection.
-- A rect, connected to an ellipse, to another ellipse, to a rect, is an Across connection.
-- A rect, connected to an ellipse, to a rhombus, is an Up connection.
-- A rhombus connected to another rhombus is a Through connection.
+- A rhombus, connected to a shape, whose parent is a rect container, is a Down connection.
+- A shape, whose parent is a rect container, connected to another shape whose parent is a rect container, is an Across connection.
+- A shape, whose parent is a rect container, connected to a rhombus, is an Up connection.
+- A rhombus, connected to another rhobus, is a Through connection.
 
 Or, in terms of the runtime:
 
