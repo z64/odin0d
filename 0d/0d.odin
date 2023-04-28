@@ -4,6 +4,7 @@ import "core:container/queue"
 import "core:fmt"
 import "core:mem"
 import "core:strings"
+import "core:intrinsics"
 
 // Data for an asyncronous component - effectively, a function with input
 // and output queues of messages.
@@ -21,6 +22,10 @@ import "core:strings"
 //
 // `leaf_data` is a pointer to any extra state data that the `leaf_handler`
 // function may want whenever it is invoked again.
+//
+// `state` is a free integer that can be used for writing leaves that act as
+// state machines. There is a convenience proc `set_state` that will do the
+// cast for you when writing.
 Eh :: struct {
     name:         string,
     input:        FIFO,
@@ -31,6 +36,7 @@ Eh :: struct {
     handler:      #type proc(eh: ^Eh, message: Message_Untyped),
     leaf_handler: rawptr, //#type proc(eh: ^Eh, message: Message($Datum)),
     leaf_data:    rawptr, //#type proc(eh: ^Eh, message: Message($Datum), data: ^$Data),
+    state:        int,
 }
 
 // Message passed to a leaf component.
@@ -193,6 +199,15 @@ container_handler :: proc(eh: ^Eh, message: Message_Untyped) {
     for any_child_ready(eh) {
         step_children(eh)
     }
+}
+
+// Sets the state variable on the Eh instance to the integer value of the
+// given enum.
+set_state :: #force_inline proc(eh: ^Eh, state: $State)
+where
+    intrinsics.type_is_enum(State)
+{
+    eh.state = int(state)
 }
 
 // Frees the given container and associated data.
