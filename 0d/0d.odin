@@ -25,6 +25,7 @@ Eh :: struct {
     name:         string,
     input:        FIFO,
     output:       FIFO,
+    yield:        FIFO,
     children:     []^Eh,
     connections:  []Connector,
     handler:      #type proc(eh: ^Eh, message: Message_Untyped),
@@ -158,6 +159,14 @@ send :: proc(eh: ^Eh, port: string, data: $Data) {
     fifo_push(&eh.output, msg)
 }
 
+// Enqueues a message that will be returned to this component.
+// This can be used to suspend leaf execution while, e.g. IO, completes
+// in the background.
+yield :: proc(eh: ^Eh, port: string, data: $Data) {
+    msg := make_message(port, data)
+    fifo_push(&eh.yield, msg)
+}
+
 // Returns a list of all output messages on a container.
 // For testing / debugging purposes.
 output_list :: proc(eh: ^Eh, allocator := context.allocator) -> []Message_Untyped {
@@ -175,7 +184,7 @@ output_list :: proc(eh: ^Eh, allocator := context.allocator) -> []Message_Untype
 container_handler :: proc(eh: ^Eh, message: Message_Untyped) {
     route(eh, nil, message)
     for any_child_ready(eh) {
-        dispatch_children(eh)
+        step_children(eh)
     }
 }
 
@@ -291,6 +300,29 @@ dispatch_children :: proc(container: ^Eh) {
     }
 }
 
+step_children :: proc(container: ^Eh) {
+    for child in container.children {
+        msg: Message_Untyped
+        ok: bool
+
+        switch {
+        case child.yield.len > 0:
+            msg, ok = fifo_pop(&child.yield)
+        case child.input.len > 0:
+            msg, ok = fifo_pop(&child.input)
+        }
+
+        if ok {
+            child.handler(child, msg)
+        }
+
+        for child.output.len > 0 {
+            msg, _ = fifo_pop(&child.output)
+            route(container, child, msg)
+        }
+    }
+}
+
 // Routes a single message to all matching destinations, according to
 // the container's connection network.
 route :: proc(container: ^Eh, from: ^Eh, message: Message_Untyped) {
@@ -313,7 +345,7 @@ any_child_ready :: proc(container: ^Eh) -> (ready: bool) {
 }
 
 child_is_ready :: proc(eh: ^Eh) -> bool {
-    return !fifo_is_empty(eh.output) || !fifo_is_empty(eh.input)
+    return !fifo_is_empty(eh.output) || !fifo_is_empty(eh.input) || !fifo_is_empty(eh.yield)
 }
 
 // Utility for printing an array of messages.
