@@ -72,12 +72,19 @@ make_leaf :: proc{
 // Creates a new leaf component out of a handler function.
 make_leaf_simple :: proc(name: string, handler: proc(^Eh, Message($Datum))) -> ^Eh {
     leaf_handler :: proc(eh: ^Eh, untyped_message: Message_Untyped) {
-        ok := untyped_message.datum_type_id == typeid_of(Datum)
-        fmt.assertf(ok, "Component %s got message with type %v, expected %v", eh.name, untyped_message.datum_type_id, typeid_of(Datum))
+        when Datum == any {
+            message := Message(Datum) {
+                port  = untyped_message.port,
+                datum = any{untyped_message.datum, untyped_message.datum_type_id},
+            }
+        } else {
+            ok := untyped_message.datum_type_id == typeid_of(Datum)
+            fmt.assertf(ok, "Component %s got message with type %v, expected %v", eh.name, untyped_message.datum_type_id, typeid_of(Datum))
 
-        message := Message(Datum) {
-            port  = untyped_message.port,
-            datum = (^Datum)(untyped_message.datum)^,
+            message := Message(Datum) {
+                port  = untyped_message.port,
+                datum = (^Datum)(untyped_message.datum)^,
+            }
         }
 
         handler := (proc(^Eh, Message(Datum)))(eh.leaf_handler)
@@ -314,11 +321,13 @@ step_children :: proc(container: ^Eh) {
 
         if ok {
             child.handler(child, msg)
+            destroy_message(msg)
         }
 
         for child.output.len > 0 {
             msg, _ = fifo_pop(&child.output)
             route(container, child, msg)
+            destroy_message(msg)
         }
     }
 }
