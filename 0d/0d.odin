@@ -284,29 +284,6 @@ deposit :: proc(c: Connector, message: Message_Untyped) {
     fifo_push(c.receiver.queue, new_message)
 }
 
-// For all children that are ready to process messages, consumes a message
-// from their input queue, calls their handler, and then routes any output
-// messages they produced.
-dispatch_children :: proc(container: ^Eh) {
-    route_child_outputs :: proc(container: ^Eh, child: ^Eh) {
-        for child.output.len > 0 {
-            msg, _ := fifo_pop(&child.output)
-            route(container, child, msg)
-            destroy_message(msg)
-        }
-    }
-
-    for child in &container.children {
-        if child_is_ready(child) {
-            msg, ok := fifo_pop(&child.input)
-            assert(ok, "child was ready, but no message in input queue")
-            child.handler(child, msg)
-            route_child_outputs(container, child)
-            destroy_message(msg)
-        }
-    }
-}
-
 step_children :: proc(container: ^Eh) {
     for child in container.children {
         msg: Message_Untyped
