@@ -5,6 +5,7 @@ import "core:fmt"
 import "core:mem"
 import "core:strings"
 import "core:intrinsics"
+import "core:log"
 
 // Data for an asyncronous component - effectively, a function with input
 // and output queues of messages.
@@ -85,7 +86,10 @@ make_leaf_simple :: proc(name: string, handler: proc(^Eh, Message($Datum))) -> ^
             }
         } else {
             ok := untyped_message.datum_type_id == typeid_of(Datum)
-            fmt.assertf(ok, "Component %s got message with type %v, expected %v", eh.name, untyped_message.datum_type_id, typeid_of(Datum))
+            if !ok {
+                log.errorf("Component %s(%s) got message with type %v, expected %v", eh.name, untyped_message.port, untyped_message.datum_type_id, typeid_of(Datum))
+                return
+            }
 
             message := Message(Datum) {
                 port  = untyped_message.port,
@@ -113,7 +117,10 @@ make_leaf_simple :: proc(name: string, handler: proc(^Eh, Message($Datum))) -> ^
 make_leaf_with_data :: proc(name: string, data: ^$Data, handler: proc(^Eh, Message($Datum), ^Data)) -> ^Eh {
     leaf_handler_with_data :: proc(eh: ^Eh, untyped_message: Message_Untyped) {
         ok := untyped_message.datum_type_id == typeid_of(Datum)
-        fmt.assertf(ok, "Component %s got message with type %v, expected %v", eh.name, untyped_message.datum_type_id, typeid_of(Datum))
+        if !ok {
+            log.errorf("Component %s(%s) got message with type %v, expected %v", eh.name, untyped_message.port, untyped_message.datum_type_id, typeid_of(Datum))
+            return
+        }
 
         message := Message(Datum) {
             port  = untyped_message.port,
@@ -316,12 +323,14 @@ step_children :: proc(container: ^Eh) {
         }
 
         if ok {
+            log.debugf("INPUT  0x%p %s/%s(%s)", child, container.name, child.name, msg.port)
             child.handler(child, msg)
             destroy_message(msg)
         }
 
         for child.output.len > 0 {
             msg, _ = fifo_pop(&child.output)
+            log.debugf("OUTPUT 0x%p %s/%s(%s)", child, container.name, child.name, msg.port)
             route(container, child, msg)
             destroy_message(msg)
         }
