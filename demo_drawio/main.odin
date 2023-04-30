@@ -1,3 +1,15 @@
+/*
+
+This example demonstrates taking a `.drawio` file and interpreting it at
+runtime into a control flow configuration on top of the 0d runtime.
+
+You can make edits to `example.drawio`, and re-run the program without
+recompiling to observe changes.
+
+See `README.md` for more information on the implemented reference diagram
+syntax.
+
+*/
 package demo_drawio
 
 import "core:fmt"
