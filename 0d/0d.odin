@@ -175,6 +175,10 @@ send :: proc(eh: ^Eh, port: string, data: $Data) {
 // Enqueues a message that will be returned to this component.
 // This can be used to suspend leaf execution while, e.g. IO, completes
 // in the background.
+//
+// NOTE(z64): this functionality is an active area of research; we are
+// exploring how to best expose an API that allows for concurrent IO etc.
+// while staying in-line with the principles of the system.
 yield :: proc(eh: ^Eh, port: string, data: $Data) {
     msg := make_message(port, data)
     fifo_push(&eh.yield, msg)
