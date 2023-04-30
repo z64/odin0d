@@ -5,7 +5,7 @@ This repo is a project organized for the [2023 Handmade Visibility Jam](https://
 ## Files
 
 - [0d](./0d) - Reference 0d implementation package
-- [diagram](./diagram) - (Simple) MxGraph diagram parser
+- [syntax](./syntax) - Syntax parser based on MxGraph diagrams
 - [demo_basics](./demo_basics) - Example using the 0d API manually
 - [demo_drawio](./demo_drawio) - Combines `0d` and `diagram` to show off hot loaded control flow based on a draw.io diagram file.
 
