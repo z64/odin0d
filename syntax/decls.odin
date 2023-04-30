@@ -1,7 +1,4 @@
-package demo_drawio
-
-import dg "../diagram"
-import zd "../0d"
+package syntax
 
 Container_Decl :: struct {
     name:        string,
@@ -10,11 +7,18 @@ Container_Decl :: struct {
 }
 
 Connect_Decl :: struct {
-    dir:         zd.Direction,
+    dir:         Direction,
     source:      Elem_Reference,
     source_port: string,
     target:      Elem_Reference,
     target_port: string,
+}
+
+Direction :: enum {
+    Down,
+    Across,
+    Up,
+    Through,
 }
 
 Elem_Reference :: struct {
@@ -22,7 +26,8 @@ Elem_Reference :: struct {
     id:   int,
 }
 
-container_decl_from_diagram :: proc(page: dg.Page) -> Container_Decl {
+// Collects all declarations on the passed page, using the semantics outlined below.
+container_decl_from_page :: proc(page: Page) -> Container_Decl {
     decl: Container_Decl
     decl.name = page.name
 
@@ -38,7 +43,10 @@ container_decl_from_diagram :: proc(page: dg.Page) -> Container_Decl {
     return decl
 }
 
-collect_children :: proc(cells: []dg.Cell) -> []Elem_Reference {
+// Semantics for detecting container children:
+//
+// All elements that are rects, and marked as a container.
+collect_children :: proc(cells: []Cell) -> []Elem_Reference {
     children := make([dynamic]Elem_Reference)
 
     for cell in cells {
@@ -51,7 +59,11 @@ collect_children :: proc(cells: []dg.Cell) -> []Elem_Reference {
     return children[:]
 }
 
-collect_up_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
+// Semantics for detecting "Up" decls.
+//
+// An element with a parent, connected to a rhombus (arrow towards the rhombus)
+// Where a "parent" is a "rect marked as a container"
+collect_up_decls :: proc(cells: []Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue
 
@@ -78,7 +90,11 @@ collect_up_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
     }
 }
 
-collect_across_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
+// Semantics for detecting "Across" decls:
+//
+// An element with a parent connected to another element with a parent
+// Where a "parent" is a "rect marked as a container"
+collect_across_decls :: proc(cells: []Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue
 
@@ -107,7 +123,11 @@ collect_across_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
     }
 }
 
-collect_down_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
+// Semantics for detecting "Down" decls:
+//
+// Rhombus connected to an element that has a parent (arrow away from the rhombus)
+// Where a "parent" is a "rect marked as a container"
+collect_down_decls :: proc(cells: []Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue
 
@@ -134,7 +154,10 @@ collect_down_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
     }
 }
 
-collect_through_decls :: proc(cells: []dg.Cell, decls: ^[dynamic]Connect_Decl) {
+// Semantics for detecting "Through" decls:
+//
+// Two rhombuses connected by an arrow.
+collect_through_decls :: proc(cells: []Cell, decls: ^[dynamic]Connect_Decl) {
     for cell in cells {
         if cell.type != .Arrow do continue
 

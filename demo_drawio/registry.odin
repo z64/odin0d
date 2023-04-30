@@ -1,8 +1,6 @@
 package demo_drawio
 
-import "core:fmt"
-
-import dg "../diagram"
+import "../syntax"
 import zd "../0d"
 
 Component_Registry :: struct {
@@ -10,7 +8,7 @@ Component_Registry :: struct {
 }
 
 Container_Initializer :: struct {
-    decl: Container_Decl,
+    decl: syntax.Container_Decl,
 }
 
 Leaf_Initializer :: struct {
@@ -30,16 +28,8 @@ make_component_registry :: proc(leaves: []Leaf_Initializer, container_xml: strin
         reg.initializers[leaf_init.name] = leaf_init
     }
 
-    pages, ok := dg.read_from_xml_file(container_xml)
-    assert(ok, "Failed parsing container XML")
-
-    decls := make([dynamic]Container_Decl)
-    defer delete(decls)
-
-    for page in pages {
-        decl := container_decl_from_diagram(page)
-        append(&decls, decl)
-    }
+    decls, err := syntax.parse_drawio_mxgraph(container_xml)
+    assert(err == .None, "Failed parsing container XML")
 
     for decl in decls {
         container_init := Container_Initializer {
@@ -65,7 +55,7 @@ get_component_instance :: proc(reg: Component_Registry, name: string) -> (instan
     return instance, ok
 }
 
-container_initializer :: proc(reg: Component_Registry, decl: Container_Decl) -> ^zd.Eh {
+container_initializer :: proc(reg: Component_Registry, decl: syntax.Container_Decl) -> ^zd.Eh {
     container := zd.make_container(decl.name)
 
     children := make([dynamic]^zd.Eh)
@@ -95,7 +85,6 @@ container_initializer :: proc(reg: Component_Registry, decl: Container_Decl) -> 
 
         for c in decl.connections {
             connector: zd.Connector
-            connector.direction = c.dir
 
             target_component: ^zd.Eh
             target_ok := false
@@ -105,6 +94,7 @@ container_initializer :: proc(reg: Component_Registry, decl: Container_Decl) -> 
 
             switch c.dir {
             case .Down:
+                connector.direction = .Down
                 connector.sender = {
                     nil,
                     c.source_port,
@@ -117,6 +107,7 @@ container_initializer :: proc(reg: Component_Registry, decl: Container_Decl) -> 
                     c.target_port,
                 }
             case .Across:
+                connector.direction = .Across
                 source_component, source_ok = child_id_map[c.source.id]
                 target_component, target_ok = child_id_map[c.target.id]
 
@@ -130,6 +121,7 @@ container_initializer :: proc(reg: Component_Registry, decl: Container_Decl) -> 
                     c.target_port,
                 }
             case .Up:
+                connector.direction = .Up
                 source_component, source_ok = child_id_map[c.source.id]
                 connector.sender = {
                     source_component,
@@ -142,6 +134,7 @@ container_initializer :: proc(reg: Component_Registry, decl: Container_Decl) -> 
                 }
                 target_ok = true
             case .Through:
+                connector.direction = .Through
                 connector.sender = {
                     nil,
                     c.source_port,

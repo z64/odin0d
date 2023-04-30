@@ -1,7 +1,6 @@
 package demo_drawio
 
 import "core:fmt"
-import "core:strings"
 import "core:time"
 import zd "../0d"
 
@@ -18,8 +17,8 @@ leaf_echo_init :: proc(name: string) -> ^Eh {
     @(static) counter := 0
     counter += 1
 
-    name := fmt.aprintf("Echo (ID:%d)", counter)
-    return make_leaf(name, leaf_echo_proc)
+    name_with_id := fmt.aprintf("Echo (ID:%d)", counter)
+    return make_leaf(name_with_id, leaf_echo_proc)
 }
 
 leaf_echo_proc :: proc(eh: ^Eh, msg: Message(string)) {
@@ -36,8 +35,8 @@ leaf_sleep_init :: proc(name: string) -> ^Eh {
     @(static) counter := 0
     counter += 1
 
-    name := fmt.aprintf("Sleep (ID:%d)", counter)
-    return make_leaf(name, leaf_sleep_proc)
+    name_with_id := fmt.aprintf("Sleep (ID:%d)", counter)
+    return make_leaf(name_with_id, leaf_sleep_proc)
 }
 
 leaf_sleep_proc :: proc(eh: ^Eh, msg: Message(any)) {
