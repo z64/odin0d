@@ -49,10 +49,16 @@ leaf_process_proc :: proc(eh: ^zd.Eh, msg: zd.Message(any), command: ^string) {
                 os.write(handle.input, bytes)
             case []byte:
                 os.write(handle.input, value)
+            case Bang:
+                // OK, no input, just run it
+            case:
+                log.errorf("%s: Shell leaf input can handle string, bytes, or bang (got: %v)", eh.name, value.id)
             }
             os.close(handle.input)
             process_wait(handle)
         }
+
+        zd.send(eh, "done", Bang{})
 
         // stdout handling
         {
@@ -149,7 +155,7 @@ main :: proc() {
         iter := zd.make_fifo_iterator(&main_container.output)
         for msg in zd.fifo_iterate(&iter) {
             a := any{msg.datum, msg.datum_type_id}
-            fmt.printf("%s = %#v", msg.port, a)
+            fmt.printf("%s = %#v\n", msg.port, a)
         }
     } else {
         fmt.println("(no output)")
