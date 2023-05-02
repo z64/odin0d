@@ -90,8 +90,6 @@ process_start :: proc(command: string) -> Process_Handle {
         os.close(stdin_write)
         os.close(stderr_read)
         os.close(stderr_write)
-        os.close(stdout_read)
-        os.close(stdout_write)
 
         // TODO(z64): use another pipe to communicate exit status/errno of child
         exit_code := libc.system(command_cstr)
