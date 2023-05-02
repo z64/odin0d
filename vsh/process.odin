@@ -33,11 +33,6 @@ F_SETFL    :: 4
 O_CLOEXEC  :: 524288
 O_NONBLOCK :: 2048
 
-Pipe_Pair :: struct {
-    read:  os.Handle,
-    write: os.Handle,
-}
-
 unix_pipe :: proc() -> (read: os.Handle, write: os.Handle) {
     fds: [2]os.Handle
 
