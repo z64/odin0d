@@ -115,7 +115,7 @@ cell_from_elem :: proc(elem: xml.Element) -> Cell {
     }
 
     cell: Cell
-        cell.type = .Rect
+    cell.type = .Rect
 
     for attrib in elem.attribs {
         switch attrib.key {
@@ -123,7 +123,7 @@ cell_from_elem :: proc(elem: xml.Element) -> Cell {
         case "source": cell.mxgraph_source = attrib.val
         case "target": cell.mxgraph_target = attrib.val
         case "parent": cell.mxgraph_parent = attrib.val
-        case "value":  cell.value = attrib.val
+        case "value":  cell.value = html_unescape(attrib.val)
         case "vertex": incl(&cell.flags, Flag_Value.Vertex)
         case "edge":
             incl(&cell.flags, Flag_Value.Edge)
@@ -142,4 +142,53 @@ cell_from_elem :: proc(elem: xml.Element) -> Cell {
     }
 
     return cell
+}
+
+// NOTE(z64): This is a best-minimal-effort implementation of unescaping :)
+// If you find any other encoded stuff, please feel free to add them to `REPLACEMENTS`.
+//
+// This currently always makes a new string.
+html_unescape :: proc(s: string) -> string {
+    REPLACEMENTS :: [][2]string {
+        {"&lt;", "<"},
+        {"&gt;", ">"},
+        {"&amp;", "&"},
+        {"&quot;", "\""},
+        {"&#39;", "'"},
+        {"&#039;", "\\"},
+    }
+
+    b := strings.builder_make()
+    s := s
+
+    scan_loop: for {
+        start := strings.index_rune(s, '&')
+        if start == -1 {
+            break scan_loop
+        }
+
+        end := strings.index_rune(s, ';')
+        if end == -1 {
+            break scan_loop
+        }
+
+        substr := s[start:end+1]
+        replace_loop: for row in REPLACEMENTS {
+            if row[0] == substr {
+                strings.write_string(&b, s[:start])
+                strings.write_string(&b, row[1])
+                s = s[end+1:]
+                continue scan_loop
+            }
+        }
+
+        // no replacement found
+        strings.write_string(&b, s[:end+1])
+        s = s[end+1:]
+    }
+
+    if len(s) > 0 {
+        strings.write_string(&b, s)
+    }
+    return strings.to_string(b)
 }
