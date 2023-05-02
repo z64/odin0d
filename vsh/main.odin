@@ -12,6 +12,14 @@ import zd "../0d"
 
 Bang :: struct {}
 
+leaf_stdout_init :: proc(name: string) -> ^zd.Eh {
+    return zd.make_leaf(name, leaf_stdout_proc)
+}
+
+leaf_stdout_proc :: proc(eh: ^zd.Eh, msg: zd.Message(any)) {
+    fmt.printf("%#v", msg.datum)
+}
+
 leaf_process_init :: proc(name: string) -> ^zd.Eh {
     command_string := strings.clone(strings.trim_left(name, "$ "))
     command_string_ptr := new_clone(command_string)
@@ -131,9 +139,15 @@ main :: proc() {
         os.exit(1)
     }
 
-    // set up leaves
+    // set up shell leaves
     leaves := make([dynamic]Leaf_Initializer)
     collect_process_leaves(diagram_source_file, &leaves)
+
+    // export native leaves
+    append(&leaves, Leaf_Initializer {
+        name = "stdout",
+        init = leaf_stdout_init,
+    })
 
     regstry := make_component_registry(leaves[:], diagram_source_file)
 
