@@ -36,6 +36,7 @@ parse_drawio_mxgraph :: proc(path: string) -> (decls: []Container_Decl, err: Err
         if elem.ident == "root" {
             page := page_from_elem(xml, elem)
             decl := container_decl_from_page(page)
+            decl.file = path
             append(&decl_array, decl)
         }
     }

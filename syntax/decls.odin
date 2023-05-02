@@ -1,6 +1,7 @@
 package syntax
 
 Container_Decl :: struct {
+    file:        string,
     name:        string,
     children:    []Elem_Reference,
     connections: []Connect_Decl,
