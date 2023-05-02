@@ -116,15 +116,22 @@ make_leaf_simple :: proc(name: string, handler: proc(^Eh, Message($Datum))) -> ^
 // parameter.
 make_leaf_with_data :: proc(name: string, data: ^$Data, handler: proc(^Eh, Message($Datum), ^Data)) -> ^Eh {
     leaf_handler_with_data :: proc(eh: ^Eh, untyped_message: Message_Untyped) {
-        ok := untyped_message.datum_type_id == typeid_of(Datum)
-        if !ok {
-            log.errorf("Component %s(%s) got message with type %v, expected %v", eh.name, untyped_message.port, untyped_message.datum_type_id, typeid_of(Datum))
-            return
-        }
+        when Datum == any {
+            message := Message(Datum) {
+                port  = untyped_message.port,
+                datum = any{untyped_message.datum, untyped_message.datum_type_id},
+            }
+        } else {
+            ok := untyped_message.datum_type_id == typeid_of(Datum)
+            if !ok {
+                log.errorf("Component %s(%s) got message with type %v, expected %v", eh.name, untyped_message.port, untyped_message.datum_type_id, typeid_of(Datum))
+                return
+            }
 
-        message := Message(Datum) {
-            port  = untyped_message.port,
-            datum = (^Datum)(untyped_message.datum)^,
+            message := Message(Datum) {
+                port  = untyped_message.port,
+                datum = (^Datum)(untyped_message.datum)^,
+            }
         }
 
         handler := (proc(^Eh, Message(Datum), ^Data))(eh.leaf_handler)
