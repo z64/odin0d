@@ -72,8 +72,18 @@ page_from_elem :: proc(doc: ^xml.Document, elem: xml.Element) -> (page: Page) {
     page.cells = make([]Cell, len(elem.children))
     for child_id, idx in elem.children {
         elem := doc.elements[child_id]
-        assert(elem.ident == "mxCell", "Unexpected XML layout (root children)")
-        page.cells[idx] = cell_from_elem(elem)
+        switch elem.ident {
+        case "mxCell":
+            page.cells[idx] = cell_from_elem(doc, elem, nil)
+        case "UserObject":
+            if len(elem.children) > 0 {
+                mxcell_child := doc.elements[elem.children[0]]
+                assert(mxcell_child.ident == "mxCell", "Unexpected XML layout (UserObject child is not mxCell)")
+                page.cells[idx] = cell_from_elem(doc, mxcell_child, elem)
+            }
+        case:
+            panic("Unexpected XML layout (root children)")
+        }
     }
 
     // sort & assign IDs
@@ -102,7 +112,7 @@ page_from_elem :: proc(doc: ^xml.Document, elem: xml.Element) -> (page: Page) {
     return page
 }
 
-cell_from_elem :: proc(elem: xml.Element) -> Cell {
+cell_from_elem :: proc(doc: ^xml.Document, elem: xml.Element, user_object_parent: Maybe(xml.Element)) -> Cell {
     style_kv :: proc(s: string) -> (k, v: string) {
         idx := strings.index(s, "=")
         if idx == -1 {
@@ -137,6 +147,15 @@ cell_from_elem :: proc(elem: xml.Element) -> Cell {
                 case "rhombus": cell.type = .Rhombus
                 case "container": incl(&cell.flags, Flag_Value.Container)
                 }
+            }
+        }
+    }
+
+    if parent, ok := user_object_parent.?; ok {
+        for attrib in parent.attribs {
+            switch attrib.key {
+            case "id":    cell.mxgraph_id = attrib.val
+            case "label": cell.value = attrib.val
             }
         }
     }
